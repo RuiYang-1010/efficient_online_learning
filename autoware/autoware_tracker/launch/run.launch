@@ -1,0 +1,13 @@
+<launch>
+
+    <rosparam file="$(find autoware_tracker)/config/params.yaml" command="load" />
+
+    <node pkg="rviz" type="rviz" name="rviz_lala" args="-d $(find autoware_tracker)/launch/rviz.rviz" />
+
+    <node pkg="autoware_tracker" type="lidar_euclidean_cluster_detect" name="lidar_euclidean_cluster_detect" output="screen" />
+
+    <node pkg="autoware_tracker" type="imm_ukf_pda" name="imm_ukf_pda" output="screen" />
+
+    <node pkg="autoware_tracker" type="visualize_detected_objects" name="ukf_track_visualization" output="screen" />
+
+</launch>

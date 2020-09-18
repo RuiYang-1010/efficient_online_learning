@@ -1,0 +1,6 @@
+<launch>
+  <node pkg="online_forests_ros" type="online_forests_ros" name="online_forests_ros" output="screen" respawn="false">
+    <param name="conf_file_name" type="string" value="$(find online_forests_ros)/config/orf.conf"/>
+    <param name="mode" type="int" value="3"/>
+  </node>
+</launch> 

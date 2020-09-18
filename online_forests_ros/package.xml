@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>online_forests_ros</name>
+  <version>0.1.2</version>
+  <description>
+    A package that ROSifies the Online Random Forests.
+  </description>
+  <maintainer email="zhi.yan@utbm.fr">Zhi Yan</maintainer>
+  <license>MIT</license>
+
+  <url>https://github.com/amirsaffari/online-random-forests</url>
+  <author email="amir@ymer.org">Amir Saffari</author>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <depend>roscpp</depend>
+  
+  <build_depend>libconfig++-dev</build_depend>
+  <build_depend>libgmm++-dev</build_depend>
+  <build_depend>libatlas-base-dev</build_depend>
+  <build_depend>libblas-dev</build_depend>
+  <build_depend>liblapack-dev</build_depend>
+  <build_depend>autoware_tracker</build_depend>
+  <build_depend>std_msgs</build_depend>
+  
+  <exec_depend>autoware_tracker</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+</package>

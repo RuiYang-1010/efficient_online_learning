@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>point_cloud_features</name>
+  <version>0.0.1</version>
+  <description>
+    A ROS package for extracting features from 3D point clouds.
+  </description>
+  <maintainer email="zhi.yan@utbm.fr">Zhi Yan</maintainer>
+  <license>BSD</license>
+
+  <url>https://github.com/yzrobot/online_learning</url>
+  <author email="zhi.yan@utbm.fr">Zhi Yan</author>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <depend>roscpp</depend>
+  <depend>pcl_conversions</depend>
+  <depend>pcl_ros</depend>
+  <depend>std_msgs</depend>
+</package>
