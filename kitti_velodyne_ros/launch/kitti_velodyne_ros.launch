@@ -1,0 +1,8 @@
+<launch>
+  <node pkg="kitti_velodyne_ros" type="kitti_velodyne_ros" name="kitti_velodyne_ros" output="screen" respawn="false">
+    <param name="velodyne_dir" type="string" value="/home/z/Downloads/kitti_velodyne/"/>
+    <param name="save_to_csv" type="bool" value="false"/>
+  </node>
+  
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find kitti_velodyne_ros)/launch/kitti_velodyne_ros.rviz"/>
+</launch> 

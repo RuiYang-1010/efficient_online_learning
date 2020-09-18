@@ -1,0 +1,21 @@
+<launch>
+  <node pkg="kitti_velodyne_ros" type="kitti_velodyne_ros" name="kitti_velodyne_ros" output="screen" respawn="false">
+    <param name="velodyne_dir" type="string" value="/home/z/Downloads/KITTI/odometry/sequences/00/velodyne/"/>
+    <param name="poses_file" type="string" value="/home/z/Downloads/KITTI/odometry/sequences/00/poses.txt"/>
+  </node>
+  
+  <node pkg="loam_velodyne" type="multiScanRegistration" name="multiScanRegistration" output="screen">
+    <remap from="/multi_scan_points" to="/kitti_velodyne_ros/velodyne_points" />
+    <param name="lidar" value="HDL-64E" />
+  </node>
+  <node pkg="loam_velodyne" type="laserOdometry" name="laserOdometry" output="screen" respawn="true"/>
+  <node pkg="loam_velodyne" type="laserMapping" name="laserMapping" output="screen"/>
+  <node pkg="loam_velodyne" type="transformMaintenance" name="transformMaintenance" output="screen">
+  </node>
+  
+  <node pkg="tf" type="static_transform_publisher" name="baselink_to_velodyne" args="-0.27 0 1.73 0 0 0 base_link velodyne 100"/>
+  <node pkg="tf" type="static_transform_publisher" name="odom_to_baselink" args="0 0 0 0 0 0 odom base_link 100"/>
+  
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find kitti_velodyne_ros)/launch/kitti_velodyne_ros_loam.rviz"/>
+  <!-- <node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find loam_velodyne)/rviz_cfg/loam_velodyne.rviz" /> -->
+</launch> 
