@@ -1,6 +1,6 @@
 # online_forests_ros
 
-This pacakge is forked from (https://github.com/amirsaffari/online-random-forests)[https://github.com/amirsaffari/online-random-forests], and the original Readme file is below the dividing line.
+This pacakge is forked from [https://github.com/amirsaffari/online-random-forests](https://github.com/amirsaffari/online-random-forests), and the original Readme file is below the dividing line.
 
 [2020-09-18]: ROSified the original Online Random Forests, and added support for data stream (not limited to files).
 
