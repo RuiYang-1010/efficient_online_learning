@@ -3,21 +3,21 @@
  *
  * Copyright (c) 2020, Zhi Yan
  * All rights reserved.
- 
+
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- 
+
  * 1. Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
- 
+
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
- 
+
  * 3. Neither the name of the copyright holder nor the names of its
  * contributors may be used to endorse or promote products derived from
  * this software without specific prior written permission.
- 
+
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -40,10 +40,10 @@ int main(int argc, char **argv) {
   bool number_of_points, min_distance, covariance_mat3D, normalized_MOIT, slice_feature, intensity_distribution;
   std::vector<float> covariance, moit, slice, intensity, features_dig;
   autoware_tracker::DetectedObjectArray::ConstPtr objects_msg;
-  
+
   ros::init(argc, argv, "point_cloud_features");
   ros::NodeHandle private_nh("~");
-  
+
   ros::Publisher features_pub = private_nh.advertise<std_msgs::String>("features", 100, false); // c.f. https://github.com/amirsaffari/online-random-forests#data-format
 
   private_nh.param<int>("minimum_points", minimum_points, 5);
@@ -53,23 +53,23 @@ int main(int argc, char **argv) {
   private_nh.param<bool>("normalized_MOIT", normalized_MOIT, true);
   private_nh.param<bool>("slice_feature", slice_feature, true);
   private_nh.param<bool>("intensity_distribution", intensity_distribution, true);
-  
+
   while (ros::ok()) {
     objects_msg = ros::topic::waitForMessage<autoware_tracker::DetectedObjectArray>("/autoware_tracker/tracker/objects"); // process blocked waiting
     std_msgs::String features_msg;
     int number_of_samples = 0;
-    
+
     for(int i = 0; i < objects_msg->objects.size(); i++) {
       if(objects_msg->objects[i].pointcloud.data.size() >= minimum_points) {
 	pcl::PointCloud<pcl::PointXYZI>::Ptr pc(new pcl::PointCloud<pcl::PointXYZI>);
 	pcl::fromROSMsg(objects_msg->objects[i].pointcloud, *pc);
-	
+
 	covariance.clear();
 	moit.clear();
 	slice.clear();
 	intensity.clear();
 	features_dig.clear();
-	
+
 	if(number_of_points) {
 	  features_dig.push_back(numberOfPoints(pc));
 	}
@@ -92,9 +92,10 @@ int main(int argc, char **argv) {
 	  intensityDistribution(pc, 25, intensity);
 	  features_dig.insert(features_dig.end(), intensity.begin(), intensity.end());
 	}
-	
-	//features_msg.data += objects_msg->objects[i].label; // Rui, your label goes here!
-	features_msg.data += "1";
+  //ROS_INFO("Got id: %d", objects_msg->objects[i].id);
+	//ROS_INFO("Got label: %s", objects_msg->objects[i].label.c_str());
+	features_msg.data += objects_msg->objects[i].label; // Rui, your label goes here!
+	//features_msg.data += "1";
 	for(int j = 0; j < features_dig.size(); j++) {
 	  features_msg.data += " " + std::to_string(j+1) + ":" + std::to_string(features_dig[j]);
 	}
@@ -102,14 +103,14 @@ int main(int argc, char **argv) {
 	number_of_samples++;
       }
     }
-    
+
     features_msg.data.insert(0, std::to_string(number_of_samples) + " " + std::to_string(features_dig.size()) + " 3 1\n");
     if(features_pub.getNumSubscribers() > 0) {
       features_pub.publish(features_msg);
     }
-    
+
     ros::spinOnce();
   }
-  
+
   return EXIT_SUCCESS;
 }

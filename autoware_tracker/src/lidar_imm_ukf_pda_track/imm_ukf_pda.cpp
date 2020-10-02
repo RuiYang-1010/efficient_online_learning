@@ -648,7 +648,6 @@ ImmUkfPda::removeRedundantObjects(const autoware_tracker::DetectedObjectArray& i
     {
       best_object.label = best_label;
     }
-
     resulting_objects.objects.push_back(best_object);
   }
 
@@ -688,7 +687,6 @@ void ImmUkfPda::makeOutput(const autoware_tracker::DetectedObjectArray& input,
     dd.velocity_reliable = targets_[i].is_stable_;
     dd.pose_reliable = targets_[i].is_stable_;
 
-
     if (!targets_[i].is_static_ && targets_[i].is_stable_)
     {
       // Aligh the longest side of dimentions with the estimated orientation
@@ -718,6 +716,17 @@ void ImmUkfPda::makeOutput(const autoware_tracker::DetectedObjectArray& input,
       tmp_objects.objects.push_back(dd);
       used_targets_indices.push_back(i);
     }
+
+    if(dd.velocity.linear.x >= 20){
+      dd.label = "0";
+    }else if(dd.velocity.linear.x >10 && dd.velocity.linear.x < 20){
+      dd.label = "1";
+    }else if(dd.velocity.linear.x >5 && dd.velocity.linear.x < 10){
+      dd.label = "2";
+    }
+    ROS_WARN("Got ID: %d", dd.id);
+    ROS_WARN("Got Velocity: %f", dd.velocity.linear.x);
+    ROS_WARN("Got Class: %s", dd.label.c_str());
   }
   detected_objects_output = removeRedundantObjects(tmp_objects, used_targets_indices);
 }

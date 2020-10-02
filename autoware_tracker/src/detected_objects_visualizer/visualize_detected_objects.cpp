@@ -22,7 +22,7 @@
 VisualizeDetectedObjects::VisualizeDetectedObjects() : arrow_height_(0.5), label_height_(1.0)
 {
   ros::NodeHandle private_nh_;//("~");
-  
+
   private_nh_.param<double>("object_speed_threshold", object_speed_threshold_, 0.1);
   ROS_INFO("[%s] object_speed_threshold: %.2f", __APP_NAME__, object_speed_threshold_);
 
@@ -235,12 +235,12 @@ VisualizeDetectedObjects::ObjectsToModels(const autoware_tracker::DetectedObject
 
       model.lifetime = ros::Duration(marker_display_duration_);
       model.header = in_objects.header;
-      model.type = visualization_msgs::Marker::MESH_RESOURCE;
+      //model.type = visualization_msgs::Marker::MESH_RESOURCE;
       model.action = visualization_msgs::Marker::ADD;
       model.ns = "model_markers";
       model.mesh_use_embedded_materials = false;
       model.color = model_color_;
-      if(object.label == "car")
+      /* if(object.label == "car")
       {
         model.mesh_resource = "package://detected_objects_visualizer/models/car.dae";
       }
@@ -263,7 +263,7 @@ VisualizeDetectedObjects::ObjectsToModels(const autoware_tracker::DetectedObject
       else
       {
         model.mesh_resource = "package://detected_objects_visualizer/models/box.dae";
-      }
+      } */
       model.scale.x = 1;
       model.scale.y = 1;
       model.scale.z = 1;
