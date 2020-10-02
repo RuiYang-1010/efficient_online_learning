@@ -717,16 +717,14 @@ void ImmUkfPda::makeOutput(const autoware_tracker::DetectedObjectArray& input,
       used_targets_indices.push_back(i);
     }
 
-    if(dd.velocity.linear.x >= 20){
-      dd.label = "0";
-    }else if(dd.velocity.linear.x >10 && dd.velocity.linear.x < 20){
-      dd.label = "1";
-    }else if(dd.velocity.linear.x >5 && dd.velocity.linear.x < 10){
-      dd.label = "2";
-    }
-    ROS_WARN("Got ID: %d", dd.id);
-    ROS_WARN("Got Velocity: %f", dd.velocity.linear.x);
-    ROS_WARN("Got Class: %s", dd.label.c_str());
+    // if(dd.velocity.linear.x >= 20){
+    //   dd.label = "0";
+    // }else if(dd.velocity.linear.x >10 && dd.velocity.linear.x < 20){
+    //   dd.label = "1";
+    // }else if(dd.velocity.linear.x >5 && dd.velocity.linear.x < 10){
+    //   dd.label = "2";
+    // }
+
   }
   detected_objects_output = removeRedundantObjects(tmp_objects, used_targets_indices);
 }

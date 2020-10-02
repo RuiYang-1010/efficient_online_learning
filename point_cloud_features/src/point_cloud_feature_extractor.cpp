@@ -92,10 +92,8 @@ int main(int argc, char **argv) {
 	  intensityDistribution(pc, 25, intensity);
 	  features_dig.insert(features_dig.end(), intensity.begin(), intensity.end());
 	}
-  //ROS_INFO("Got id: %d", objects_msg->objects[i].id);
-	//ROS_INFO("Got label: %s", objects_msg->objects[i].label.c_str());
-	features_msg.data += objects_msg->objects[i].label; // Rui, your label goes here!
-	//features_msg.data += "1";
+	//features_msg.data += objects_msg->objects[i].label; // Rui, your label goes here!
+	features_msg.data += "1";
 	for(int j = 0; j < features_dig.size(); j++) {
 	  features_msg.data += " " + std::to_string(j+1) + ":" + std::to_string(features_dig[j]);
 	}
