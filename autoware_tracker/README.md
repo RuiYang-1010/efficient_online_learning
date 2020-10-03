@@ -2,6 +2,7 @@
 
 This pacakge is forked from [https://github.com/TixiaoShan/autoware_tracker](https://github.com/TixiaoShan/autoware_tracker), and the original Readme file is below the dividing line.
 
+[2020-10-xx]: Added "automatic annotation" for point clouds, please install the dependencies first: `$ sudo apt install ros-melodic-vision-msgs`.
 [2020-09-18]: Added "intensity" to the points, which is essential for our online learning system, as the intensity can help us distinguish objects.
 
 ---
