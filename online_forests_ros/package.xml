@@ -5,6 +5,7 @@
   <description>
     A package that ROSifies the Online Random Forests.
   </description>
+  <maintainer email="rui.yang@utbm.fr">Rui Yang</maintainer>
   <maintainer email="zhi.yan@utbm.fr">Zhi Yan</maintainer>
   <license>MIT</license>
 
