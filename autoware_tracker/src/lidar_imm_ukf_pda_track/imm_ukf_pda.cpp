@@ -268,7 +268,7 @@ bool ImmUkfPda::updateDirection(const double smallest_nis, const autoware_tracke
 bool ImmUkfPda::storeObjectWithNearestLaneDirection(const autoware_tracker::DetectedObject& in_object,
                                                  autoware_tracker::DetectedObject& out_object)
 {
-  geometry_msgs::Pose lane_frame_pose = getTransformedPose(in_object.pose, tracking_frame2lane_frame_);
+  // geometry_msgs::Pose lane_frame_pose = getTransformedPose(in_object.pose, tracking_frame2lane_frame_);
   double min_dist = std::numeric_limits<double>::max();
 
   double min_yaw = 0;

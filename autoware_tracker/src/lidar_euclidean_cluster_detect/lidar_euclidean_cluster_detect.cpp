@@ -27,8 +27,8 @@
 
 #include <pcl/kdtree/kdtree.h>
 
-#include <pcl/sample_consensus/method_types.h>
-#include <pcl/sample_consensus/model_types.h>
+#include <pcl-1.8/pcl/sample_consensus/method_types.h>
+#include <pcl-1.8/pcl/sample_consensus/model_types.h>
 
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/segmentation/extract_clusters.h>
@@ -67,6 +67,13 @@
 #endif
 
 #include "cluster.h"
+
+// yang21icra
+#include <vision_msgs/Detection2DArray.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
+// yang21icra
 
 #define __APP_NAME__ "euclidean_clustering"
 
@@ -179,7 +186,8 @@ void transformBoundingBox(const jsk_recognition_msgs::BoundingBox &in_boundingbo
     out_boundingbox.label = in_boundingbox.label;
 }
 
-void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_clusters)
+void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_clusters,
+			    const vision_msgs::Detection2DArrayConstPtr& in_image_detections)
 {
   autoware_tracker::DetectedObjectArray detected_objects;
   detected_objects.header = in_clusters.header;
@@ -188,8 +196,16 @@ void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_cluste
   {
     autoware_tracker::DetectedObject detected_object;
     detected_object.header = in_clusters.header;
-    detected_object.label = "unknown";
-    detected_object.score = 1.;
+    //detected_object.label = "unknown";
+    //detected_object.score = 1.;
+    // yang21icra
+    for(size_t j = 0; j < in_image_detections->detections.size(); j++) {
+      //if(found_label) { // TODO
+	detected_object.label = in_image_detections->detections[j].results[0].id; // 0:car, 1:pedestrian, 2:cyclist
+	detected_object.score = in_image_detections->detections[j].results[0].score;
+	//}
+    }
+    // yang21icra
     detected_object.space_frame = in_clusters.header.frame_id;
     detected_object.pose = in_clusters.clusters[i].bounding_box.pose;
     detected_object.dimensions = in_clusters.clusters[i].dimensions;
@@ -203,7 +219,8 @@ void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_cluste
 }
 
 void publishCloudClusters(const ros::Publisher *in_publisher, const autoware_tracker::CloudClusterArray &in_clusters,
-                          const std::string &in_target_frame, const std_msgs::Header &in_header)
+                          const std::string &in_target_frame, const std_msgs::Header &in_header,
+			  const vision_msgs::Detection2DArrayConstPtr& in_image_detections)
 {
   if (in_target_frame != in_header.frame_id)
   {
@@ -250,11 +267,11 @@ void publishCloudClusters(const ros::Publisher *in_publisher, const autoware_tra
       }
     }
     in_publisher->publish(clusters_transformed);
-    publishDetectedObjects(clusters_transformed);
+    publishDetectedObjects(clusters_transformed, in_image_detections);
   } else
   {
     in_publisher->publish(in_clusters);
-    publishDetectedObjects(in_clusters);
+    publishDetectedObjects(in_clusters, in_image_detections);
   }
 }
 
@@ -755,7 +772,8 @@ void removePointsUpTo(const pcl::PointCloud<pcl::PointXYZI>::Ptr in_cloud_ptr,
   }
 }
 
-void velodyne_callback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud)
+void velodyne_callback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud,
+		       const vision_msgs::Detection2DArrayConstPtr& in_image_detections)
 {
   //_start = std::chrono::system_clock::now();
 
@@ -827,13 +845,13 @@ void velodyne_callback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud)
   segmentByDistance(diffnormals_cloud_ptr, colored_clustered_cloud_ptr, centroids, cloud_clusters);
   publishColorCloud(&_pub_cluster_cloud, colored_clustered_cloud_ptr);
   current_time = ros::WallTime::now().toSec();
-  // ROS_INFO("cluster: %lf s", current_time - start_time);
-
+  ROS_INFO("cluster: %lf s", current_time - start_time);
+  
   centroids.header = _velodyne_header;
   publishCentroids(&_centroid_pub, centroids, _output_frame, _velodyne_header);
 
   cloud_clusters.header = _velodyne_header;
-  publishCloudClusters(&_pub_clusters_message, cloud_clusters, _output_frame, _velodyne_header);
+  publishCloudClusters(&_pub_clusters_message, cloud_clusters, _output_frame, _velodyne_header, in_image_detections);
 }
 
 int main(int argc, char **argv)
@@ -864,24 +882,39 @@ int main(int argc, char **argv)
   _pub_cluster_cloud = nh.advertise<sensor_msgs::PointCloud2>("autoware_tracker/cluster/points_cluster", 1);
   _pub_ground_cloud = nh.advertise<sensor_msgs::PointCloud2>("autoware_tracker/cluster/points_ground", 1);
   _centroid_pub = nh.advertise<autoware_tracker::Centroids>("autoware_tracker/cluster/cluster_centroids", 1);
-
+  
   _pub_points_lanes_cloud = nh.advertise<sensor_msgs::PointCloud2>("autoware_tracker/cluster/points_lanes", 1);
   _pub_clusters_message = nh.advertise<autoware_tracker::CloudClusterArray>("autoware_tracker/cluster/cloud_clusters", 1);
   _pub_detected_objects = nh.advertise<autoware_tracker::DetectedObjectArray>("autoware_tracker/cluster/objects", 1);
 
   std::string points_topic = "/points_raw";
-  if (nh.getParam("autoware_tracker/cluster/points_node", points_topic))
-    ROS_INFO("[%s] Setting points node to %s", __APP_NAME__, points_topic.c_str());
-  else
-    ROS_INFO("[%s] No points node received, defaulting to points_raw", __APP_NAME__);
-
+  if (nh.getParam("autoware_tracker/cluster/points_node", points_topic)) {
+    ROS_INFO("[%s] Setting points_node to %s", __APP_NAME__, points_topic.c_str());
+  } else {
+    ROS_INFO("[%s] No points_node received, defaulting to /points_raw", __APP_NAME__);
+  }
+  // yang21icra
+  std::string image_detections_topic = "/image_detections";
+  if (nh.getParam("autoware_tracker/cluster/label_source", image_detections_topic)) {
+    ROS_INFO("[%s] Setting label_source to %s", __APP_NAME__, image_detections_topic.c_str());
+  } else {
+    ROS_INFO("[%s] No label_source received, defaulting to /image_detections", __APP_NAME__);
+  }
+  std::string extrinsic_calibration_file = "calib.txt";
+  if (nh.getParam("autoware_tracker/cluster/extrinsic_calibration", extrinsic_calibration_file)) {
+    ROS_INFO("[%s] Setting points_node to %s", __APP_NAME__, extrinsic_calibration_file.c_str());
+  } else {
+    ROS_INFO("[%s] No points_node received, defaulting to calib.txt", __APP_NAME__);
+  }
+  // yang21icra
+  
   _use_diffnormals = false;
-  if (nh.getParam("autoware_tracker/cluster/use_diffnormals", _use_diffnormals))
-  {
-    if (_use_diffnormals)
+  if (nh.getParam("autoware_tracker/cluster/use_diffnormals", _use_diffnormals)) {
+    if (_use_diffnormals) {
       ROS_INFO("[%s] Applying difference of normals on clustering pipeline", __APP_NAME__);
-    else
+    } else {
       ROS_INFO("[%s] Difference of Normals will not be used.", __APP_NAME__);
+    }
   }
 
   /* Initialize tuning parameter */
@@ -935,8 +968,17 @@ int main(int argc, char **argv)
   }
 
   // Create a ROS subscriber for the input point cloud
-  ros::Subscriber sub = nh.subscribe(points_topic, 1, velodyne_callback);
+  //ros::Subscriber sub = nh.subscribe(points_topic, 1, velodyne_callback);
+  // yang21icra
+  message_filters::Subscriber<sensor_msgs::PointCloud2> points_sub(nh, points_topic, 1);
+  message_filters::Subscriber<vision_msgs::Detection2DArray> image_detections_sub(nh, image_detections_topic, 1);
 
+  typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::PointCloud2, vision_msgs::Detection2DArray> MySyncPolicy;
+  // ApproximateTime takes a queue size as its constructor argument, hence MySyncPolicy(10)
+  message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), points_sub, image_detections_sub);
+  sync.registerCallback(boost::bind(&velodyne_callback, _1, _2));
+  // yang21icra
+  
   // Spin
   ros::spin();
 }

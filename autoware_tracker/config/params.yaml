@@ -1,6 +1,8 @@
 autoware_tracker:
 
     cluster:
+        label_source: "/image_detections"
+	extrinsic_calibration: "calib.txt"
 
         points_node: "/points_raw"
         output_frame: "velodyne"
