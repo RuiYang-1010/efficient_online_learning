@@ -2,7 +2,8 @@ autoware_tracker:
 
     cluster:
         label_source: "/image_detections"
-	extrinsic_calibration: "calib.txt"
+	extrinsic_calibration: "/home/z/Downloads/KITTI/00/calib.txt"
+	iou_threshold: 0.5
 
         points_node: "/points_raw"
         output_frame: "velodyne"

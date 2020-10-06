@@ -73,9 +73,16 @@
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include <algorithm>
+#include "../libkitti/kitti.h"
 // yang21icra
 
 #define __APP_NAME__ "euclidean_clustering"
+
+// yang21icra
+Calibration *calib;
+float iou_threshold = 0.5;
+// yang21icra
 
 using namespace cv;
 
@@ -186,6 +193,16 @@ void transformBoundingBox(const jsk_recognition_msgs::BoundingBox &in_boundingbo
     out_boundingbox.label = in_boundingbox.label;
 }
 
+// yang21icra
+// y = P_rect_2 * R0_rect * Tr_velo_to_cam * x
+Eigen::Vector3d projection(const Eigen::Vector4d &point) {
+  Eigen::Vector3d projected_point = calib->GetProjCam2() * calib->getR_rect() * calib->getTr_velo_cam() * point;
+  return Eigen::Vector3d(int(projected_point[0] / projected_point[2] + 0.5),
+			 int(projected_point[1] / projected_point[2] + 0.5),
+			 1);
+}
+// yang21icra
+
 void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_clusters,
 			    const vision_msgs::Detection2DArrayConstPtr& in_image_detections)
 {
@@ -199,11 +216,41 @@ void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_cluste
     //detected_object.label = "unknown";
     //detected_object.score = 1.;
     // yang21icra
+    Eigen::Vector4d min_point(in_clusters.clusters[i].min_point.point.x,
+			      in_clusters.clusters[i].min_point.point.y,
+			      in_clusters.clusters[i].min_point.point.z,
+			      1);
+    Eigen::Vector4d max_point(in_clusters.clusters[i].max_point.point.x,
+			      in_clusters.clusters[i].max_point.point.y,
+			      in_clusters.clusters[i].max_point.point.z,
+			      1);
+    Eigen::Vector3d projected_min_point = projection(min_point);
+    Eigen::Vector3d projected_max_point = projection(max_point);
+    
     for(size_t j = 0; j < in_image_detections->detections.size(); j++) {
-      //if(found_label) { // TODO
-	detected_object.label = in_image_detections->detections[j].results[0].id; // 0:car, 1:pedestrian, 2:cyclist
-	detected_object.score = in_image_detections->detections[j].results[0].score;
-	//}
+      int im_min_x = in_image_detections->detections[j].bbox.center.x - (in_image_detections->detections[j].bbox.size_x / 2);
+      int im_min_y = in_image_detections->detections[j].bbox.center.y - (in_image_detections->detections[j].bbox.size_y / 2);
+      int im_max_x = in_image_detections->detections[j].bbox.center.x + (in_image_detections->detections[j].bbox.size_x / 2);
+      int im_max_y = in_image_detections->detections[j].bbox.center.y + (in_image_detections->detections[j].bbox.size_y / 2);
+      
+      int x0 = std::max(int(projected_min_point[0]), im_min_x);
+      int y0 = std::max(int(projected_min_point[1]), im_min_y);
+      int x1 = std::min(int(projected_max_point[0]), im_max_x);
+      int y1 = std::min(int(projected_max_point[1]), im_max_y);
+      
+      int inter_area = std::abs(std::max(x1-x0, 0) * std::max(y1-y0, 0));
+      
+      if(inter_area > 0) {
+	int box0 = std::abs(int(projected_max_point[0] - projected_min_point[0]) *
+			    int(projected_max_point[1] - projected_min_point[1]));
+	int box1 = std::abs(int(im_max_x - im_min_x) *
+			    int(im_max_y - im_min_y));
+	
+	if((inter_area / float(box0 + box1 - inter_area)) > iou_threshold) { // iou
+	  detected_object.label = in_image_detections->detections[j].results[0].id; // 0:car, 1:pedestrian, 2:cyclist
+	  detected_object.score = in_image_detections->detections[j].results[0].score;
+	}
+      }
     }
     // yang21icra
     detected_object.space_frame = in_clusters.header.frame_id;
@@ -906,6 +953,14 @@ int main(int argc, char **argv)
   } else {
     ROS_INFO("[%s] No points_node received, defaulting to calib.txt", __APP_NAME__);
   }
+  
+  if (nh.getParam("autoware_tracker/cluster/iou_threshold", iou_threshold)) {
+    ROS_INFO("[%s] Setting points_node to %f", __APP_NAME__, iou_threshold);
+  } else {
+    ROS_INFO("[%s] No points_node received, defaulting to 0.5", __APP_NAME__);
+  }
+  
+  calib = new Calibration(extrinsic_calibration_file);
   // yang21icra
   
   _use_diffnormals = false;

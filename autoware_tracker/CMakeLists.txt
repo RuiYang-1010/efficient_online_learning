@@ -76,7 +76,8 @@ target_link_libraries(visualize_detected_objects ${OpenCV_LIBRARIES} ${EIGEN3_LI
 
 add_executable(lidar_euclidean_cluster_detect
     src/lidar_euclidean_cluster_detect/lidar_euclidean_cluster_detect.cpp
-    src/lidar_euclidean_cluster_detect/cluster.cpp)
+    src/lidar_euclidean_cluster_detect/cluster.cpp
+    src/libkitti/kitti.cpp)
 add_dependencies(lidar_euclidean_cluster_detect ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
 target_link_libraries(lidar_euclidean_cluster_detect ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 
