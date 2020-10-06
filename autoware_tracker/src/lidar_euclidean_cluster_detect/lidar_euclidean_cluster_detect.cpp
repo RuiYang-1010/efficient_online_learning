@@ -213,8 +213,8 @@ void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_cluste
   {
     autoware_tracker::DetectedObject detected_object;
     detected_object.header = in_clusters.header;
-    //detected_object.label = "unknown";
-    //detected_object.score = 1.;
+    detected_object.label = "unknown";
+    detected_object.score = 1.;
     // yang21icra
     Eigen::Vector4d min_point(in_clusters.clusters[i].min_point.point.x,
 			      in_clusters.clusters[i].min_point.point.y,
@@ -226,7 +226,8 @@ void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_cluste
 			      1);
     Eigen::Vector3d projected_min_point = projection(min_point);
     Eigen::Vector3d projected_max_point = projection(max_point);
-    
+
+    float iou_max = 0;
     for(size_t j = 0; j < in_image_detections->detections.size(); j++) {
       int im_min_x = in_image_detections->detections[j].bbox.center.x - (in_image_detections->detections[j].bbox.size_x / 2);
       int im_min_y = in_image_detections->detections[j].bbox.center.y - (in_image_detections->detections[j].bbox.size_y / 2);
@@ -245,10 +246,14 @@ void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_cluste
 			    int(projected_max_point[1] - projected_min_point[1]));
 	int box1 = std::abs(int(im_max_x - im_min_x) *
 			    int(im_max_y - im_min_y));
-	
-	if((inter_area / float(box0 + box1 - inter_area)) > iou_threshold) { // iou
-	  detected_object.label = in_image_detections->detections[j].results[0].id; // 0:car, 1:pedestrian, 2:cyclist
-	  detected_object.score = in_image_detections->detections[j].results[0].score;
+
+	float iou = inter_area / float(box0 + box1 - inter_area);
+	if(iou > iou_max) {
+	  iou_max = iou;
+	  if(iou_max > iou_threshold) {
+	    detected_object.label = in_image_detections->detections[j].results[0].id; // 0:car, 1:pedestrian, 2:cyclist
+	    detected_object.score = in_image_detections->detections[j].results[0].score;
+	  }
 	}
       }
     }
