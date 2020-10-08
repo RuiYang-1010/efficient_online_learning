@@ -41,3 +41,6 @@ uint8                           behavior_state # FORWARD_STATE = 0, STOPPING_STA
 
 #
 string[]                        user_defined_info
+
+# yang21icra
+bool                            last_sample

@@ -50,6 +50,10 @@ ImmUkfPda::ImmUkfPda()
     result_file_path_ = kitti_data_dir_ + "benchmark_results.txt";
     std::remove(result_file_path_.c_str());
   }
+
+  //yang21icra
+  private_nh_.param<double>("autoware_tracker/tracker/track_probability", track_probability_, 0.7);
+  //yang21icra
 }
 
 void ImmUkfPda::run()
@@ -87,7 +91,51 @@ void ImmUkfPda::callback(const autoware_tracker::DetectedObjectArray& input)
   tracker(transformed_input, detected_objects_output);
   transformPoseToLocal(detected_objects_output);
 
-  pub_object_array_.publish(detected_objects_output);
+  // yang21icra
+  for(size_t i = 0; i < learning_buffer.size(); i++) {
+    learning_buffer[i].objects.back().last_sample = true;
+  }
+  
+  for(size_t i = 0; i < input.objects.size(); i++) {
+    bool new_id = true;
+    autoware_tracker::DetectedObject obj = input.objects[i];
+    obj.last_sample = false;
+    for(size_t j = 0; j < learning_buffer.size(); j++) {
+      if(obj.id == learning_buffer[j].objects[0].id) {
+	learning_buffer[j].objects.push_back(obj);
+      	new_id = false;
+	break;
+      }
+    }
+    if(new_id) {
+      autoware_tracker::DetectedObjectArray doa;
+      doa.objects.push_back(input.objects[i]);
+      learning_buffer.push_back(doa);
+    }
+  }
+  
+  for(size_t i = 0; i < learning_buffer.size(); i++) {
+    if(learning_buffer[i].objects.back().last_sample) {
+      std::vector<double> odds;
+      double product_odds = 1.0;
+      for(size_t j = 0; j < learning_buffer[i].objects.size(); j++) {
+	if(learning_buffer[i].objects[j].score == 1.0) {
+	  odds.push_back(100.0);
+	} else {
+	  odds.push_back(learning_buffer[i].objects[j].score / (1 - learning_buffer[i].objects[j].score));
+	}
+      }
+      for(size_t j = 0; j < odds.size(); j++) {
+	product_odds *= odds[j];
+      }
+      if(product_odds / (1 + product_odds) > track_probability_) {
+	pub_object_array_.publish(learning_buffer[i]);
+      }
+    }
+  }
+  // yang21icra
+  
+  //pub_object_array_.publish(detected_objects_output);
 
   if (is_benchmark_)
   {

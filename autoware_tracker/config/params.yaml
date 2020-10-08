@@ -45,5 +45,6 @@ autoware_tracker:
 
         tracking_frame: "/world"
         # namespace: /detection/object_tracker/
+	track_probability: 0.7
 
 

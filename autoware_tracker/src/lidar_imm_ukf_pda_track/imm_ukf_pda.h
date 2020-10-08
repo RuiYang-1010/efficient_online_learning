@@ -104,6 +104,11 @@ private:
 
   std_msgs::Header input_header_;
 
+  // yang21icra
+  std::vector<autoware_tracker::DetectedObjectArray> learning_buffer;
+  double track_probability_;
+  // yang21icra
+
   void callback(const autoware_tracker::DetectedObjectArray& input);
 
   void transformPoseToGlobal(const autoware_tracker::DetectedObjectArray& input,
