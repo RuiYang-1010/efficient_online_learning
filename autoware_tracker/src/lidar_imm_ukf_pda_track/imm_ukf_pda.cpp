@@ -131,6 +131,7 @@ void ImmUkfPda::callback(const autoware_tracker::DetectedObjectArray& input)
       if(product_odds / (1 + product_odds) > track_probability_) {
 	pub_object_array_.publish(learning_buffer[i]);
       }
+      learning_buffer.erase(learning_buffer.begin()+i);
     }
   }
   // yang21icra
