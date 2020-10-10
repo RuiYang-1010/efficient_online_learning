@@ -101,7 +101,11 @@ private:
   ros::NodeHandle private_nh_;
   ros::Subscriber sub_detected_array_;
   ros::Publisher pub_object_array_;
-
+  //yang21icra
+  ros::Publisher pub_example_array_;
+  ros::Publisher vis_examples_;
+  //yang21icra
+  
   std_msgs::Header input_header_;
 
   // yang21icra
