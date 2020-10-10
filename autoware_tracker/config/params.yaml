@@ -2,8 +2,8 @@ autoware_tracker:
 
     cluster:
         label_source: "/image_detections"
-	extrinsic_calibration: "/home/z/Downloads/KITTI/00/calib.txt"
-	iou_threshold: 0.5
+        extrinsic_calibration: "/home/z/Downloads/KITTI/00/calib.txt"
+        iou_threshold: 0.5
 
         points_node: "/points_raw"
         output_frame: "velodyne"
@@ -32,7 +32,6 @@ autoware_tracker:
         pose_estimation: true
 
     tracker:
-
         gating_thres: 9.22
         gate_probability: 0.99
         detection_probability: 0.9
@@ -45,6 +44,6 @@ autoware_tracker:
 
         tracking_frame: "/world"
         # namespace: /detection/object_tracker/
-	track_probability: 0.7
+        track_probability: 0.7
 
 

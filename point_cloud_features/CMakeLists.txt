@@ -6,6 +6,7 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_conversions
   pcl_ros
   std_msgs
+  autoware_tracker
   )
 
 find_package(PCL REQUIRED)

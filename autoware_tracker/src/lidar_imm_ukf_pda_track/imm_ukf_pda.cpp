@@ -90,15 +90,15 @@ void ImmUkfPda::callback(const autoware_tracker::DetectedObjectArray& input)
   transformPoseToGlobal(input, transformed_input);
   tracker(transformed_input, detected_objects_output);
   transformPoseToLocal(detected_objects_output);
-
+  
   // yang21icra
   for(size_t i = 0; i < learning_buffer.size(); i++) {
     learning_buffer[i].objects.back().last_sample = true;
   }
   
-  for(size_t i = 0; i < input.objects.size(); i++) {
+  for(size_t i = 0; i < detected_objects_output.objects.size(); i++) {
     bool new_id = true;
-    autoware_tracker::DetectedObject obj = input.objects[i];
+    autoware_tracker::DetectedObject obj = detected_objects_output.objects[i];
     obj.last_sample = false;
     for(size_t j = 0; j < learning_buffer.size(); j++) {
       if(obj.id == learning_buffer[j].objects[0].id) {
@@ -109,7 +109,7 @@ void ImmUkfPda::callback(const autoware_tracker::DetectedObjectArray& input)
     }
     if(new_id) {
       autoware_tracker::DetectedObjectArray doa;
-      doa.objects.push_back(input.objects[i]);
+      doa.objects.push_back(detected_objects_output.objects[i]);
       learning_buffer.push_back(doa);
     }
   }

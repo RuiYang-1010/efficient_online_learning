@@ -1029,6 +1029,7 @@ int main(int argc, char **argv)
 
   // Create a ROS subscriber for the input point cloud
   //ros::Subscriber sub = nh.subscribe(points_topic, 1, velodyne_callback);
+
   // yang21icra
   message_filters::Subscriber<sensor_msgs::PointCloud2> points_sub(nh, points_topic, 1);
   message_filters::Subscriber<vision_msgs::Detection2DArray> image_detections_sub(nh, image_detections_topic, 1);
