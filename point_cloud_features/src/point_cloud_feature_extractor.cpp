@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
   private_nh.param<bool>("intensity_distribution", intensity_distribution, true);
 
   while (ros::ok()) {
-    objects_msg = ros::topic::waitForMessage<autoware_tracker::DetectedObjectArray>("/autoware_tracker/tracker/objects"); // process blocked waiting
+    objects_msg = ros::topic::waitForMessage<autoware_tracker::DetectedObjectArray>("/autoware_tracker/tracker/examples"); // process blocked waiting
     std_msgs::String features_msg;
     int number_of_samples = 0;
 
