@@ -17,6 +17,8 @@ int main(int argc, char **argv) {
   geometry_msgs::PoseArray poses;
   visualization_msgs::MarkerArray markers;
   bool save_to_csv;
+  std::string times_file;
+  double timestamp;
   
   ros::init(argc, argv, "kitti_velodyne_ros");
   ros::NodeHandle private_nh("~");
@@ -28,6 +30,7 @@ int main(int argc, char **argv) {
   private_nh.param<double>("frequency", frequency, 10);
   private_nh.param<std::string>("velodyne_dir", velodyne_dir, "velodyne_dir_path");
   private_nh.param<std::string>("poses_file", poses_file, "poses_file_path");
+  private_nh.param<std::string>("times_file", times_file, "times_file_path");
   private_nh.param<bool>("save_to_csv", save_to_csv, false);
   
   ros::Rate loop_rate(frequency);
@@ -48,8 +51,17 @@ int main(int argc, char **argv) {
     ROS_WARN_STREAM("[kitti_velodyne_ros] Could not read poses file: " << poses_file);
   }
   
+  std::fstream times_txt(times_file.c_str(), std::ios::in);
+  if(!times_txt.good()) {
+    ROS_WARN_STREAM("[kitti_velodyne_ros] Could not read times file: " << times_file);
+  }
+  
   int i_file = 2; // 0 = . 1 = ..
   while(ros::ok() && i_file < n_file) {
+    /*** Timestamp ***/
+    times_txt >> timestamp;
+    ros::Time timestamp_ros(timestamp == 0 ? ros::TIME_MIN.toSec() : timestamp);
+    
     /*** Velodyne ***/
     std::string s = velodyne_dir + filelist[i_file]->d_name;
     std::fstream velodyne_bin(s.c_str(), std::ios::in | std::ios::binary);
@@ -84,7 +96,11 @@ int main(int argc, char **argv) {
     	sensor_msgs::PointCloud2 pc2;
     	pcl::toROSMsg(*cloud, pc2);
     	pc2.header.frame_id = "velodyne";
-    	pc2.header.stamp = ros::Time::now();
+	if(!poses_txt.good()) {
+	  pc2.header.stamp = ros::Time::now();
+	} else {
+	  pc2.header.stamp = timestamp_ros;
+	}
     	velodyne_pub.publish(pc2);
       }
     }
@@ -97,7 +113,11 @@ int main(int argc, char **argv) {
     p.position.z = 0;
     p.orientation.w = 1;
     poses.poses.push_back(p);
-    poses.header.stamp = ros::Time::now();
+    if(!poses_txt.good()) {
+      poses.header.stamp = ros::Time::now();
+    } else {
+      poses.header.stamp = timestamp_ros;
+    }
     poses.header.frame_id = "base_link";
     poses_pub.publish(poses);
     
