@@ -92,8 +92,13 @@ int main(int argc, char **argv) {
 	  intensityDistribution(pc, 25, intensity);
 	  features_dig.insert(features_dig.end(), intensity.begin(), intensity.end());
 	}
-	//features_msg.data += objects_msg->objects[i].label; // Rui, your label goes here!
-	features_msg.data += "1";
+	
+	if(objects_msg->objects[i].label.compare("unknown") == 0) {
+	  features_msg.data += "0";
+	} else {
+	  features_msg.data += objects_msg->objects[i].label; // 1:car, 2:pedestrian, 3:cyclist
+	}
+	
 	for(int j = 0; j < features_dig.size(); j++) {
 	  features_msg.data += " " + std::to_string(j+1) + ":" + std::to_string(features_dig[j]);
 	}

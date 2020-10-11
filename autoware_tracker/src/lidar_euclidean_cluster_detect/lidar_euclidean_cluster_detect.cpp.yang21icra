@@ -203,7 +203,8 @@ Eigen::Vector3d projection(const Eigen::Vector4d &point) {
 }
 // yang21icra
 
-void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_clusters)
+void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_clusters,
+			    const vision_msgs::Detection2DArrayConstPtr& in_image_detections)
 {
   autoware_tracker::DetectedObjectArray detected_objects;
   detected_objects.header = in_clusters.header;
@@ -215,47 +216,47 @@ void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_cluste
     detected_object.label = "unknown";
     detected_object.score = 1.;
     // yang21icra
-    // Eigen::Vector4d min_point(in_clusters.clusters[i].min_point.point.x,
-    // 			      in_clusters.clusters[i].min_point.point.y,
-    // 			      in_clusters.clusters[i].min_point.point.z,
-    // 			      1);
-    // Eigen::Vector4d max_point(in_clusters.clusters[i].max_point.point.x,
-    // 			      in_clusters.clusters[i].max_point.point.y,
-    // 			      in_clusters.clusters[i].max_point.point.z,
-    // 			      1);
-    // Eigen::Vector3d projected_min_point = projection(min_point);
-    // Eigen::Vector3d projected_max_point = projection(max_point);
+    Eigen::Vector4d min_point(in_clusters.clusters[i].min_point.point.x,
+			      in_clusters.clusters[i].min_point.point.y,
+			      in_clusters.clusters[i].min_point.point.z,
+			      1);
+    Eigen::Vector4d max_point(in_clusters.clusters[i].max_point.point.x,
+			      in_clusters.clusters[i].max_point.point.y,
+			      in_clusters.clusters[i].max_point.point.z,
+			      1);
+    Eigen::Vector3d projected_min_point = projection(min_point);
+    Eigen::Vector3d projected_max_point = projection(max_point);
 
-    // float iou_max = 0;
-    // for(size_t j = 0; j < in_image_detections->detections.size(); j++) {
-    //   int im_min_x = in_image_detections->detections[j].bbox.center.x - (in_image_detections->detections[j].bbox.size_x / 2);
-    //   int im_min_y = in_image_detections->detections[j].bbox.center.y - (in_image_detections->detections[j].bbox.size_y / 2);
-    //   int im_max_x = in_image_detections->detections[j].bbox.center.x + (in_image_detections->detections[j].bbox.size_x / 2);
-    //   int im_max_y = in_image_detections->detections[j].bbox.center.y + (in_image_detections->detections[j].bbox.size_y / 2);
+    float iou_max = 0;
+    for(size_t j = 0; j < in_image_detections->detections.size(); j++) {
+      int im_min_x = in_image_detections->detections[j].bbox.center.x - (in_image_detections->detections[j].bbox.size_x / 2);
+      int im_min_y = in_image_detections->detections[j].bbox.center.y - (in_image_detections->detections[j].bbox.size_y / 2);
+      int im_max_x = in_image_detections->detections[j].bbox.center.x + (in_image_detections->detections[j].bbox.size_x / 2);
+      int im_max_y = in_image_detections->detections[j].bbox.center.y + (in_image_detections->detections[j].bbox.size_y / 2);
       
-    //   int x0 = std::max(int(projected_min_point[0]), im_min_x);
-    //   int y0 = std::max(int(projected_min_point[1]), im_min_y);
-    //   int x1 = std::min(int(projected_max_point[0]), im_max_x);
-    //   int y1 = std::min(int(projected_max_point[1]), im_max_y);
+      int x0 = std::max(int(projected_min_point[0]), im_min_x);
+      int y0 = std::max(int(projected_min_point[1]), im_min_y);
+      int x1 = std::min(int(projected_max_point[0]), im_max_x);
+      int y1 = std::min(int(projected_max_point[1]), im_max_y);
       
-    //   int inter_area = std::abs(std::max(x1-x0, 0) * std::max(y1-y0, 0));
+      int inter_area = std::abs(std::max(x1-x0, 0) * std::max(y1-y0, 0));
       
-    //   if(inter_area > 0) {
-    // 	int box0 = std::abs(int(projected_max_point[0] - projected_min_point[0]) *
-    // 			    int(projected_max_point[1] - projected_min_point[1]));
-    // 	int box1 = std::abs(int(im_max_x - im_min_x) *
-    // 			    int(im_max_y - im_min_y));
+      if(inter_area > 0) {
+	int box0 = std::abs(int(projected_max_point[0] - projected_min_point[0]) *
+			    int(projected_max_point[1] - projected_min_point[1]));
+	int box1 = std::abs(int(im_max_x - im_min_x) *
+			    int(im_max_y - im_min_y));
 
-    // 	float iou = inter_area / float(box0 + box1 - inter_area);
-    // 	if(iou > iou_max) {
-    // 	  iou_max = iou;
-    // 	  if(iou_max > iou_threshold) {
-    // 	    detected_object.label = std::to_string(in_image_detections->detections[j].results[0].id); // 1:car, 2:pedestrian, 3:cyclist
-    // 	    detected_object.score = in_image_detections->detections[j].results[0].score;
-    // 	  }
-    // 	}
-    //   }
-    // }
+	float iou = inter_area / float(box0 + box1 - inter_area);
+	if(iou > iou_max) {
+	  iou_max = iou;
+	  if(iou_max > iou_threshold) {
+	    detected_object.label = std::to_string(in_image_detections->detections[j].results[0].id); // 1:car, 2:pedestrian, 3:cyclist
+	    detected_object.score = in_image_detections->detections[j].results[0].score;
+	  }
+	}
+      }
+    }
     // yang21icra
     detected_object.space_frame = in_clusters.header.frame_id;
     detected_object.pose = in_clusters.clusters[i].bounding_box.pose;
@@ -270,7 +271,8 @@ void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_cluste
 }
 
 void publishCloudClusters(const ros::Publisher *in_publisher, const autoware_tracker::CloudClusterArray &in_clusters,
-                          const std::string &in_target_frame, const std_msgs::Header &in_header)
+                          const std::string &in_target_frame, const std_msgs::Header &in_header,
+			  const vision_msgs::Detection2DArrayConstPtr& in_image_detections)
 {
   if (in_target_frame != in_header.frame_id)
   {
@@ -317,11 +319,11 @@ void publishCloudClusters(const ros::Publisher *in_publisher, const autoware_tra
       }
     }
     in_publisher->publish(clusters_transformed);
-    publishDetectedObjects(clusters_transformed);
+    publishDetectedObjects(clusters_transformed, in_image_detections);
   } else
   {
     in_publisher->publish(in_clusters);
-    publishDetectedObjects(in_clusters);
+    publishDetectedObjects(in_clusters, in_image_detections);
   }
 }
 
@@ -822,7 +824,8 @@ void removePointsUpTo(const pcl::PointCloud<pcl::PointXYZI>::Ptr in_cloud_ptr,
   }
 }
 
-void velodyne_callback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud)
+void velodyne_callback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud,
+		       const vision_msgs::Detection2DArrayConstPtr& in_image_detections)
 {
   //_start = std::chrono::system_clock::now();
 
@@ -900,7 +903,7 @@ void velodyne_callback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud)
   publishCentroids(&_centroid_pub, centroids, _output_frame, _velodyne_header);
 
   cloud_clusters.header = _velodyne_header;
-  publishCloudClusters(&_pub_clusters_message, cloud_clusters, _output_frame, _velodyne_header);
+  publishCloudClusters(&_pub_clusters_message, cloud_clusters, _output_frame, _velodyne_header, in_image_detections);
 }
 
 int main(int argc, char **argv)
@@ -1025,16 +1028,16 @@ int main(int argc, char **argv)
   }
 
   // Create a ROS subscriber for the input point cloud
-  ros::Subscriber sub = nh.subscribe(points_topic, 1, velodyne_callback);
+  //ros::Subscriber sub = nh.subscribe(points_topic, 1, velodyne_callback);
   
   // yang21icra
-  // message_filters::Subscriber<sensor_msgs::PointCloud2> points_sub(nh, points_topic, 1);
-  // message_filters::Subscriber<vision_msgs::Detection2DArray> image_detections_sub(nh, image_detections_topic, 1);
+  message_filters::Subscriber<sensor_msgs::PointCloud2> points_sub(nh, points_topic, 1);
+  message_filters::Subscriber<vision_msgs::Detection2DArray> image_detections_sub(nh, image_detections_topic, 1);
 
-  // typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::PointCloud2, vision_msgs::Detection2DArray> MySyncPolicy;
-  // // ApproximateTime takes a queue size as its constructor argument, hence MySyncPolicy(10)
-  // message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), points_sub, image_detections_sub);
-  // sync.registerCallback(boost::bind(&velodyne_callback, _1, _2));
+  typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::PointCloud2, vision_msgs::Detection2DArray> MySyncPolicy;
+  // ApproximateTime takes a queue size as its constructor argument, hence MySyncPolicy(10)
+  message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), points_sub, image_detections_sub);
+  sync.registerCallback(boost::bind(&velodyne_callback, _1, _2));
   // yang21icra
   
   // Spin

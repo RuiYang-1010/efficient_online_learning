@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
     /*** Velodyne ***/
     std::string s = velodyne_dir + filelist[i_file]->d_name;
     std::fstream velodyne_bin(s.c_str(), std::ios::in | std::ios::binary);
-    std::cerr << s.c_str() << std::endl;
+    //std::cerr << s.c_str() << std::endl;
     if(!velodyne_bin.good()) {
       ROS_ERROR_STREAM("[kitti_velodyne_ros] Could not read file: " << s);
       return EXIT_FAILURE;

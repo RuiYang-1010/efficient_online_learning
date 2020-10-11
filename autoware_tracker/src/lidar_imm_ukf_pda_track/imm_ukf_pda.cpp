@@ -109,11 +109,10 @@ void ImmUkfPda::callback(const autoware_tracker::DetectedObjectArray& input)
   
   for(size_t i = 0; i < detected_objects_output.objects.size(); i++) {
     bool new_id = true;
-    autoware_tracker::DetectedObject obj = detected_objects_output.objects[i];
-    obj.last_sample = false;
+    detected_objects_output.objects[i].last_sample = false;
     for(size_t j = 0; j < learning_buffer.size(); j++) {
-      if(obj.id == learning_buffer[j].objects[0].id) {
-	learning_buffer[j].objects.push_back(obj);
+      if(detected_objects_output.objects[i].id == learning_buffer[j].objects[0].id) {
+	learning_buffer[j].objects.push_back(detected_objects_output.objects[i]);
       	new_id = false;
 	break;
       }
@@ -126,9 +125,10 @@ void ImmUkfPda::callback(const autoware_tracker::DetectedObjectArray& input)
   }
   
   for(size_t i = 0; i < learning_buffer.size(); i++) {
-    if(learning_buffer[i].objects.back().last_sample && learning_buffer[i].objects.back().label.compare("unknown") != 0) {
+    if(learning_buffer[i].objects.back().last_sample) {      
       std::vector<double> odds;
       double product_odds = 1.0;
+
       for(size_t j = 0; j < learning_buffer[i].objects.size(); j++) {
       	if(learning_buffer[i].objects[j].score == 1.0) {
       	  odds.push_back(10);
@@ -136,6 +136,7 @@ void ImmUkfPda::callback(const autoware_tracker::DetectedObjectArray& input)
       	  odds.push_back(learning_buffer[i].objects[j].score / (1 - learning_buffer[i].objects[j].score));
       	}
       }
+
       for(size_t j = 0; j < odds.size(); j++) {
       	product_odds *= odds[j];
       }
@@ -143,6 +144,8 @@ void ImmUkfPda::callback(const autoware_tracker::DetectedObjectArray& input)
       if(product_odds / (1 + product_odds) >= track_probability_) {
 	learning_buffer[i].header = detected_objects_output.header;
 	pub_example_array_.publish(learning_buffer[i]);
+	
+	std::cout << "[imm_ukf_pda.cpp] Send tack-ID [" << learning_buffer[i].objects[0].id << "] labelled as [" << learning_buffer[i].objects[0].label << "] with [" << learning_buffer[i].objects.size() << "] examples for learning." << std::endl;
 	
 	if(vis_examples_.getNumSubscribers() > 0) {
 	  sensor_msgs::PointCloud2 pc;

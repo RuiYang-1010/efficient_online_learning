@@ -1,19 +1,14 @@
 <?xml version="1.0"?>
 <launch>
-
+  
   <node pkg="kitti_velodyne_ros" type="kitti_velodyne_ros" name="kitti_velodyne_ros" output="screen" respawn="false">
-    <!--
     <param name="velodyne_dir" type="string" value="/home/z/Downloads/KITTI/00/velodyne/"/>
-    -->
-    <param name="velodyne_dir" type="string" value="/home/rui/Rui/datasets/KITTI_Odometry/00/velodyne/"/>
-    <!--
     <param name="poses_file" type="string" value="/home/z/Downloads/KITTI/00/poses.txt"/>
-    -->
-    <param name="poses_file" type="string" value="/home/rui/Rui/datasets/KITTI_Odometry/00/poses.txt"/>
-    <param name="frequency" type="double" value="10"/>
+    <param name="times_file" type="string" value="/home/z/Downloads/KITTI/00/times.txt"/>
+    <param name="frequency" type="double" value="3"/>
     <remap from="/kitti_velodyne_ros/velodyne_points" to="/points_raw"/>
   </node>
-
+  
   <rosparam file="$(find autoware_tracker)/config/params.yaml" command="load" />
   <node pkg="autoware_tracker" type="lidar_euclidean_cluster_detect" name="lidar_euclidean_cluster_detect" output="screen" />
   <node pkg="autoware_tracker" type="imm_ukf_pda" name="imm_ukf_pda" output="screen" />
@@ -31,13 +26,10 @@
 
   <node pkg="online_forests_ros" type="online_forests_ros" name="online_forests_ros" output="screen" respawn="false">
     <param name="conf_file_name" type="string" value="$(find online_forests_ros)/config/orf.conf"/>
-    <param name="mode" type="int" value="3"/>
-    <param name="minimum_samples" type="int" value="1"/>
+    <param name="mode" type="int" value="1"/>
+    <param name="minimum_samples" type="int" value="10"/>
+    <param name="save_forest" type="bool" value="false"/>
   </node>
-
-  <!--
-  <node pkg="rviz" type="rviz" name="rviz" args="-d $(env PWD)/fast_online_learning.rviz" />
-  -->
-  <node pkg="rviz" type="rviz" name="rviz" args="-d /home/rui/Rui/fast_online_learning/catkin_ws/src/fast_online_learning/fast_online_learning.rviz" />
-
+  
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(env PWD)/fast_online_learning.rviz"/>
 </launch>
