@@ -125,24 +125,47 @@ void ImmUkfPda::callback(const autoware_tracker::DetectedObjectArray& input)
   }
   
   for(size_t i = 0; i < learning_buffer.size(); i++) {
-    if(learning_buffer[i].objects.back().last_sample) {      
-      std::vector<double> odds;
-      double product_odds = 1.0;
-
+    if(learning_buffer[i].objects.back().last_sample) {
+      std::map<std::string, double> label_probabilities;
+      
       for(size_t j = 0; j < learning_buffer[i].objects.size(); j++) {
-      	if(learning_buffer[i].objects[j].score == 1.0) {
-      	  odds.push_back(10);
-      	} else {
-      	  odds.push_back(learning_buffer[i].objects[j].score / (1 - learning_buffer[i].objects[j].score));
-      	}
-      }
-
-      for(size_t j = 0; j < odds.size(); j++) {
-      	product_odds *= odds[j];
+	if(learning_buffer[i].objects[j].label.compare("unknown") != 0) {
+	  bool new_label = true;
+	  for(size_t k = 0; k < label_probabilities.size(); k++) {
+	    if(label_probabilities.find(learning_buffer[i].objects[j].label) != label_probabilities.end()) {
+	      if(learning_buffer[i].objects[j].score >= 1.0) {
+		label_probabilities[learning_buffer[i].objects[j].label] *= 10;
+	      } else {
+		label_probabilities[learning_buffer[i].objects[j].label] *= learning_buffer[i].objects[j].score / (1 - learning_buffer[i].objects[j].score);
+	      }
+	      new_label = false;
+	      break;
+	    }
+	  }
+	  if(new_label) {
+	    if(learning_buffer[i].objects[j].score >= 1.0) {
+	      label_probabilities.insert(std::pair<std::string, double>(learning_buffer[i].objects[j].label, 10));
+	    } else {
+	      label_probabilities.insert(std::pair<std::string, double>(learning_buffer[i].objects[j].label, learning_buffer[i].objects[j].score / (1 - learning_buffer[i].objects[j].score)));
+	    }
+	  }
+	}
       }
       
-      if(product_odds / (1 + product_odds) >= track_probability_) {
+      double product_odds_max = -DBL_MAX;
+      std::string track_label = "unknown";
+      for(std::map<std::string, double>::iterator it = label_probabilities.begin(); it != label_probabilities.end(); ++it) {
+	if(it->second > product_odds_max) {
+	  product_odds_max = it->second;
+	  track_label = it->first;
+	}
+      }
+      
+      if(product_odds_max / (1 + product_odds_max) >= track_probability_) {
 	learning_buffer[i].header = detected_objects_output.header;
+	for(size_t j = 0; j < learning_buffer[i].objects.size(); j++) {
+	  learning_buffer[i].objects[j].label = track_label;
+	}
 	pub_example_array_.publish(learning_buffer[i]);
 	
 	std::cout << "[imm_ukf_pda.cpp] Send tack-ID [" << learning_buffer[i].objects[0].id << "] labelled as [" << learning_buffer[i].objects[0].label << "] with [" << learning_buffer[i].objects.size() << "] examples for learning." << std::endl;
@@ -152,7 +175,7 @@ void ImmUkfPda::callback(const autoware_tracker::DetectedObjectArray& input)
 	  for(size_t k = 0; k < learning_buffer[i].objects.size(); k++) {
 	    pcl::concatenatePointCloud(pc, learning_buffer[i].objects[k].pointcloud, pc);
 	  }
-	  pc.fields[3].name = "intensity";
+	  //pc.fields[3].name = "intensity";
 	  pc.header.frame_id = "velodyne";
 	  vis_examples_.publish(pc);
 	}

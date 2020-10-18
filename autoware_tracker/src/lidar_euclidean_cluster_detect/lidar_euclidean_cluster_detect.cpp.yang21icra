@@ -209,24 +209,64 @@ void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_cluste
   autoware_tracker::DetectedObjectArray detected_objects;
   detected_objects.header = in_clusters.header;
 
-  for (size_t i = 0; i < in_clusters.clusters.size(); i++)
-  {
+  for(size_t i = 0; i < in_clusters.clusters.size(); i++) {
     autoware_tracker::DetectedObject detected_object;
     detected_object.header = in_clusters.header;
     detected_object.label = "unknown";
     detected_object.score = 1.;
     // yang21icra
-    Eigen::Vector4d min_point(in_clusters.clusters[i].min_point.point.x,
-			      in_clusters.clusters[i].min_point.point.y,
-			      in_clusters.clusters[i].min_point.point.z,
-			      1);
-    Eigen::Vector4d max_point(in_clusters.clusters[i].max_point.point.x,
-			      in_clusters.clusters[i].max_point.point.y,
-			      in_clusters.clusters[i].max_point.point.z,
-			      1);
-    Eigen::Vector3d projected_min_point = projection(min_point);
-    Eigen::Vector3d projected_max_point = projection(max_point);
+    // Bug 3D bbox to 2D
+    // Eigen::Vector4d min_point(in_clusters.clusters[i].min_point.point.x,
+    // 			      in_clusters.clusters[i].min_point.point.y,
+    // 			      in_clusters.clusters[i].min_point.point.z,
+    // 			      1);
+    // Eigen::Vector4d max_point(in_clusters.clusters[i].max_point.point.x,
+    // 			      in_clusters.clusters[i].max_point.point.y,
+    // 			      in_clusters.clusters[i].max_point.point.z,
+    // 			      1);
+    // Eigen::Vector3d projected_min_point = projection(min_point);
+    // Eigen::Vector3d projected_max_point = projection(max_point);
+    std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d> > vertices_3dbox;
+    Eigen::Vector4d left_back_down(in_clusters.clusters[i].centroid_point.point.x - in_clusters.clusters[i].dimensions.x/2, in_clusters.clusters[i].centroid_point.point.y - in_clusters.clusters[i].dimensions.y/2, in_clusters.clusters[i].centroid_point.point.z - in_clusters.clusters[i].dimensions.z/2, 1);
+    Eigen::Vector4d right_back_down(in_clusters.clusters[i].centroid_point.point.x + in_clusters.clusters[i].dimensions.x/2, in_clusters.clusters[i].centroid_point.point.y - in_clusters.clusters[i].dimensions.y/2, in_clusters.clusters[i].centroid_point.point.z - in_clusters.clusters[i].dimensions.z/2, 1);
+    Eigen::Vector4d right_front_down(in_clusters.clusters[i].centroid_point.point.x + in_clusters.clusters[i].dimensions.x/2, in_clusters.clusters[i].centroid_point.point.y + in_clusters.clusters[i].dimensions.y/2, in_clusters.clusters[i].centroid_point.point.z - in_clusters.clusters[i].dimensions.z/2, 1);
+    Eigen::Vector4d left_front_down(in_clusters.clusters[i].centroid_point.point.x - in_clusters.clusters[i].dimensions.x/2, in_clusters.clusters[i].centroid_point.point.y + in_clusters.clusters[i].dimensions.y/2, in_clusters.clusters[i].centroid_point.point.z - in_clusters.clusters[i].dimensions.z/2, 1);
+    Eigen::Vector4d left_back_up(in_clusters.clusters[i].centroid_point.point.x - in_clusters.clusters[i].dimensions.x/2, in_clusters.clusters[i].centroid_point.point.y - in_clusters.clusters[i].dimensions.y/2, in_clusters.clusters[i].centroid_point.point.z + in_clusters.clusters[i].dimensions.z/2, 1);
+    Eigen::Vector4d right_back_up(in_clusters.clusters[i].centroid_point.point.x + in_clusters.clusters[i].dimensions.x/2, in_clusters.clusters[i].centroid_point.point.y - in_clusters.clusters[i].dimensions.y/2, in_clusters.clusters[i].centroid_point.point.z + in_clusters.clusters[i].dimensions.z/2, 1);
+    Eigen::Vector4d right_front_up(in_clusters.clusters[i].centroid_point.point.x + in_clusters.clusters[i].dimensions.x/2, in_clusters.clusters[i].centroid_point.point.y + in_clusters.clusters[i].dimensions.y/2, in_clusters.clusters[i].centroid_point.point.z + in_clusters.clusters[i].dimensions.z/2, 1);
+    Eigen::Vector4d left_front_up(in_clusters.clusters[i].centroid_point.point.x - in_clusters.clusters[i].dimensions.x/2, in_clusters.clusters[i].centroid_point.point.y + in_clusters.clusters[i].dimensions.y/2, in_clusters.clusters[i].centroid_point.point.z + in_clusters.clusters[i].dimensions.z/2, 1);
+    vertices_3dbox.push_back(left_back_down);
+    vertices_3dbox.push_back(right_back_down);
+    vertices_3dbox.push_back(right_front_down);
+    vertices_3dbox.push_back(left_front_down);
+    vertices_3dbox.push_back(left_back_up);
+    vertices_3dbox.push_back(right_back_up);
+    vertices_3dbox.push_back(right_front_up);
+    vertices_3dbox.push_back(left_front_up);
 
+    std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> > projected_vertices;
+    std::cerr << "-------MUST BE 8-------vertices_3dbox.size() = " << vertices_3dbox.size() << std::endl;
+    for(size_t j = 0; j < vertices_3dbox.size(); j++) {
+      projected_vertices.push_back(projection(vertices_3dbox[j]));
+    }
+    Eigen::Vector3d projected_min_point(DBL_MAX, DBL_MAX, 1);
+    Eigen::Vector3d projected_max_point(-DBL_MAX, -DBL_MAX, 1);
+    for(size_t j = 0; j < projected_vertices.size(); j++) {
+      if(projected_min_point[0] > projected_vertices[j][0]) {
+    	projected_min_point[0] = projected_vertices[j][0];
+      }
+      if(projected_min_point[1] > projected_vertices[j][1]) {
+    	projected_min_point[1] = projected_vertices[j][1];
+      }
+      if(projected_max_point[0] < projected_vertices[j][0]) {
+    	projected_max_point[0] = projected_vertices[j][0];
+      }
+      if(projected_max_point[1] < projected_vertices[j][1]) {
+    	projected_max_point[1] = projected_vertices[j][1];
+      }
+    }
+    std::cerr << "-------projected_vertices = " << projected_min_point[0] << " " << projected_min_point[1] << " " << projected_max_point[0] << " " << projected_max_point[1] << std::endl;
+    
     float iou_max = 0;
     for(size_t j = 0; j < in_image_detections->detections.size(); j++) {
       int im_min_x = in_image_detections->detections[j].bbox.center.x - (in_image_detections->detections[j].bbox.size_x / 2);
