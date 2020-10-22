@@ -11,6 +11,7 @@
 
 int main(int argc, char **argv) {
   std::string conf_file_name;
+  std::string model_file_name;
   int mode; // 1 - train, 2 - test, 3 - train and test.
   int minimum_samples;
 
@@ -21,6 +22,13 @@ int main(int argc, char **argv) {
     ROS_INFO("Got param 'conf_file_name': %s", conf_file_name.c_str());
   } else {
     ROS_ERROR("Failed to get param 'conf_file_name'");
+    exit(EXIT_SUCCESS);
+  }
+
+  if(private_nh.getParam("model_file_name", model_file_name)) {
+    ROS_INFO("Got param 'model_file_name': %s", model_file_name.c_str());
+  } else {
+    ROS_ERROR("Failed to get param 'model_file_name'");
     exit(EXIT_SUCCESS);
   }
 
@@ -50,18 +58,18 @@ int main(int argc, char **argv) {
     if(atoi(features->data.substr(0, features->data.find(" ")).c_str()) > minimum_samples) {
       OnlineRF model(hp, dataset_tr.m_numClasses, dataset_tr.m_numFeatures, dataset_tr.m_minFeatRange, dataset_tr.m_maxFeatRange); // TOTEST: OnlineTree
 
-      string modelFileName = "/home/rui/Rui/train.model";
+      //string model_file_name = "";
       time_t start_time = time(NULL);
       switch(mode) {
         case 1: // train only
-        if(access( modelFileName.c_str(), F_OK ) != -1){
-          model.loadForest(modelFileName);
+        if(access( model_file_name.c_str(), F_OK ) != -1){
+          model.loadForest(model_file_name);
         }
         model.train(dataset_tr);
-        model.writeForest(modelFileName);
+        model.writeForest(model_file_name);
         break;
         case 2: // test only
-        model.loadForest(modelFileName);
+        model.loadForest(model_file_name);
         model.test(dataset_ts);
         break;
         case 3: // train and test
