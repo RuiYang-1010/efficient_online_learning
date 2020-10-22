@@ -87,6 +87,16 @@ public:
         return results;
     }
 
+    virtual void writeTree(FILE * fp) {
+      m_rootNode->writeNode(m_rootNode, m_counter, fp);
+      fprintf(fp,"T\n");
+    }
+
+    virtual void loadTree(FILE * fp, int tree_index) {
+      m_rootNode->loadNode(m_rootNode, fp);
+      return;
+    }
+
 private:
     double m_counter;
     const Hyperparameters *m_hp;

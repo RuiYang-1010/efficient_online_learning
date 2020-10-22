@@ -133,6 +133,38 @@ public:
         return (proj > m_threshold) ? true : false;
     }
 
+    void writeTest(FILE *fp){
+      fprintf(fp," %lf",m_threshold);
+      fprintf(fp," %lf",m_trueCount);
+      fprintf(fp," %lf",m_falseCount);
+
+      for (int i = 0; i < *m_numClasses; i++) {
+          fprintf(fp," %lf",m_trueStats[i]);
+          fprintf(fp," %lf",m_falseStats[i]);
+      }
+
+      for (int i = 0; i < *m_numProjFeatures; i++) {
+        fprintf(fp," %d",m_features[i]);
+        fprintf(fp," %lf",m_weights[i]);
+      }
+    }
+
+    void loadTest(FILE *fp){
+      fscanf(fp, "%lf ", &m_threshold);
+      fscanf(fp, "%lf ", &m_trueCount);
+      fscanf(fp, "%lf ", &m_falseCount);
+
+      for (int i = 0; i < *m_numClasses; i++) {
+        fscanf(fp, "%lf ", &m_trueStats[i]);
+        fscanf(fp, "%lf ", &m_falseStats[i]);
+      }
+
+      for (int i = 0; i < *m_numProjFeatures; i++) {
+        fscanf(fp, "%d ", &m_features[i]);
+        fscanf(fp, "%lf ", &m_weights[i]);
+      }
+    }
+
 private:
     const int *m_numProjFeatures;
     vector<int> m_features;

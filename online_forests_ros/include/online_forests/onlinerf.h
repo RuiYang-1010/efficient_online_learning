@@ -63,10 +63,11 @@ public:
             for (int i = 0; i < dataset.m_numSamples; i++) {
                 update(dataset.m_samples[randIndex[i]]);
                 if (m_hp->verbose >= 1 && (i % sampRatio) == 0) {
-                    cout << "--- Online Random Forest training --- Epoch: " << n + 1 << " --- ";
-                    cout << (10 * i) / sampRatio << "%" << endl;
+                    //cout << "--- Online Random Forest training --- Epoch: " << n + 1 << " --- ";
+                    //cout << (10 * i) / sampRatio << "%" << endl;
                 }
             }
+            cout << "--- Online Random Forest training --- Epoch: " << n + 1 << " --- " << endl;
         }
     }
 
@@ -129,6 +130,29 @@ public:
         }
 
         return results;
+    }
+
+    virtual void writeForest(string fileName) {
+        cout<<"Writing forest"<<endl;
+        FILE *fp=fopen(fileName.c_str(),"wb");
+        fprintf(fp,"%lf %lf\n",m_counter,m_oobe);
+        for (int i = 0; i < m_hp->numTrees; i++) {
+            m_trees[i]->writeTree(fp);
+        }
+        fclose(fp);
+        cout<<"Writing forest done"<<endl;
+    }
+
+    virtual void loadForest(string fileName) {
+        cout<<"Loading forest"<<endl;
+        FILE *fp=fopen(fileName.c_str(),"rb");
+        fscanf(fp, "%lf %lf\n", &m_counter, &m_oobe);
+        for (int i = 0; i < m_hp->numTrees; i++) {
+            m_trees[i]->loadTree(fp, i);
+        }
+        fclose(fp);
+        cout<<"Loading forest done"<<endl;
+        return;
     }
 
 protected:

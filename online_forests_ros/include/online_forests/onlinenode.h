@@ -2,6 +2,7 @@
 #define ONLINENODE_H_
 
 #include <vector>
+#include <queue>
 
 #include "online_forests/data.h"
 #include "online_forests/hyperparameters.h"
@@ -77,6 +78,109 @@ public:
                 return m_leftChildNode->eval(sample);
             }
         }
+    }
+
+    void writeNode(OnlineNode *node, double counter, FILE *fp)
+    {
+      queue<OnlineNode *> que;
+      que.push(node);
+      while(!que.empty()){
+        OnlineNode *cur = que.front();
+        if (cur->m_isLeaf){
+          fprintf(fp,"L");
+          fprintf(fp," %d",cur->m_depth);
+          fprintf(fp," %d",cur->m_isLeaf);
+          fprintf(fp," %lf",cur->m_counter);
+          fprintf(fp," %d",cur->m_label);
+          fprintf(fp," %lf",cur->m_parentCounter);
+          for (int i = 0; i < cur->m_labelStats.size(); i++) {
+            fprintf(fp," %lf",cur->m_labelStats[i]);
+          }
+          for (int i = 0; i < cur->m_onlineTests.size(); i++) {
+            cur->m_onlineTests[i].writeTest(fp);
+          }
+          fprintf(fp,"\n");
+          que.pop();
+        } else {
+          fprintf(fp,"S");
+          fprintf(fp," %d",cur->m_depth);
+          fprintf(fp," %d",cur->m_isLeaf);
+          fprintf(fp," %lf",cur->m_counter);
+          fprintf(fp," %d",cur->m_label);
+          fprintf(fp," %lf",cur->m_parentCounter);
+          for (int i = 0; i < cur->m_labelStats.size(); i++) {
+            fprintf(fp," %lf",cur->m_labelStats[i]);
+          }
+          cur->m_bestTest.writeTest(fp);
+          fprintf(fp,"\n");
+          que.pop();
+          que.push( cur->m_leftChildNode );
+          que.push( cur->m_rightChildNode );
+
+          /* if( cur->m_leftChildNode != nullptr){
+            que.push( cur->m_leftChildNode );
+          }
+          if( cur->m_rightChildNode != nullptr){
+            que.push( cur->m_rightChildNode );
+          } */
+        }
+      }
+    }
+
+    void loadNode(OnlineNode *node, FILE *fp)
+    {
+      char node_type;
+      queue<OnlineNode *> tree;
+      OnlineNode *cur;
+      tree.push(node);
+
+      while(!tree.empty()){
+        cur = tree.front();
+        tree.pop();
+
+        fscanf(fp,"%c ",&node_type);
+
+        if(node_type == 'T'){
+          //cout<<"Loading next tree"<<endl;
+          return;
+        } else if (node_type == 'L'){
+          fscanf(fp, "%d ", &cur->m_depth);
+          fscanf(fp, "%d ", &cur->m_isLeaf);
+          fscanf(fp, "%lf ", &cur->m_counter);
+          fscanf(fp, "%d ", &cur->m_label);
+          fscanf(fp, "%lf ", &cur->m_parentCounter);
+          for (int i = 0; i < cur->m_labelStats.size(); i++) {
+            fscanf(fp, "%lf ", &cur->m_labelStats[i]);
+          }
+          for (int i = 0; i < cur->m_onlineTests.size(); i++) {
+            cur->m_onlineTests[i].loadTest(fp);
+          }
+          fscanf(fp,"\n");
+
+        } else if (node_type == 'S'){
+          fscanf(fp, "%d ", &cur->m_depth);
+          fscanf(fp, "%d ", &cur->m_isLeaf);
+          fscanf(fp, "%lf ", &cur->m_counter);
+          fscanf(fp, "%d ", &cur->m_label);
+          fscanf(fp, "%lf ", &cur->m_parentCounter);
+          for (int i = 0; i < cur->m_labelStats.size(); i++) {
+            fscanf(fp, "%lf ", &cur->m_labelStats[i]);
+          }
+          HyperplaneFeature temp_bestTest(*m_numClasses, *m_numFeatures, m_hp->numProjectionFeatures, *m_minFeatRange, *m_maxFeatRange);
+          cur->m_bestTest = temp_bestTest;
+          cur->m_bestTest.loadTest(fp);
+          fscanf(fp,"\n");
+
+          pair<vector<double> , vector<double> > parentStats = cur->m_bestTest.getStats();
+          cur->m_leftChildNode = new OnlineNode(*cur->m_hp, *cur->m_numClasses, *cur->m_numFeatures, *cur->m_minFeatRange, *cur->m_maxFeatRange, cur->m_depth + 1,
+                  parentStats.second);
+          tree.push(cur->m_leftChildNode);
+          cur->m_rightChildNode = new OnlineNode(*cur->m_hp, *cur->m_numClasses, *cur->m_numFeatures, *cur->m_minFeatRange, *cur->m_maxFeatRange, cur->m_depth + 1,
+                  parentStats.first);
+          tree.push(cur->m_rightChildNode);
+        }
+      }
+      return;
     }
 
 private:
