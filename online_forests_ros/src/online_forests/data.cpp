@@ -52,7 +52,7 @@ void DataSet::loadLIBSVM(string filename) {
         resize(sample.x, m_numFeatures);
         fp >> sample.y; // read label
         sample.w = 1.0; // set weight
-
+	
         getline(fp, line); // read the rest of the line
         prePos = 0;
         curPos = line.find(' ', 0);
@@ -98,7 +98,7 @@ void DataSet::loadLIBSVM2(string data) {
   m_numFeatures = atoi(line.c_str());
   getline(iss, line, ' ');
   m_numClasses = atoi(line.c_str());
-  getline(iss, line, ' ');
+  getline(iss, line, '\n');
   startIndex = atoi(line.c_str());
   
   // Reading the data
@@ -110,11 +110,10 @@ void DataSet::loadLIBSVM2(string data) {
     wsvector<double> x(m_numFeatures);
     Sample sample;
     resize(sample.x, m_numFeatures);
-    getline(iss, line, ' ');
-    sample.y = atoi(line.c_str()); // read label
+    getline(iss, line);
+    sample.y = atoi(line.substr(line.find(' ')).c_str()); // read label
     sample.w = 1.0; // set weight
-    
-    getline(iss, line); // read the rest of the line
+
     prePos = 0;
     curPos = line.find(' ', 0);
     while (prePos <= curPos) {
