@@ -1,4 +1,4 @@
-// (c) 2020 Zhi Yan
+// (c) 2020 Zhi Yan, Rui Yang
 // This code is licensed under MIT license (see LICENSE.txt for details)
 #define GMM_USES_BLAS
 
