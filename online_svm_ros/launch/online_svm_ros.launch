@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="online_svm_ros" type="online_svm_ros" name="online_svm_ros" output="screen" respawn="false">
+    <param name="svm_train_params" type="string" value="$(find online_svm_ros)/config/svm.yaml"/>
+  </node>
+</launch> 

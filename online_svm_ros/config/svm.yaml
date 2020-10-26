@@ -1,0 +1,17 @@
+# https://github.com/cjlin1/libsvm
+x_lower:	-1.0
+x_upper: 	1.0
+max_examples:	5000
+svm_type: 	0	# default 0 (C_SVC)
+kernel_type: 	2	# default 2 (RBF)
+degree: 	3	# default 3
+gamma: 		0.02	# default 1.0/(float)FEATURE_SIZE
+coef0: 		0	# default 0
+cache_size: 	256	# default 100
+eps: 		0.001	# default 0.001
+C: 		8	# default 1
+nr_weight: 	0
+nu: 		0.5
+p: 		0.1
+shrinking: 	0
+probability: 	1

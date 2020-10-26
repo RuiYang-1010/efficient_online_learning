@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>online_svm_ros</name>
+  <version>0.0.1</version>
+  <description>
+    Online SVM.
+  </description>
+  <maintainer email="zhi.yan@utbm.fr">Zhi Yan</maintainer>
+  <license>GPLv3</license>
+  
+  <url>https://github.com/yzrobot/online_learning</url>
+  <author email="zhi.yan@utbm.fr">Zhi Yan</author>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <depend>roscpp</depend>
+  <depend>yaml-cpp</depend>
+  <depend>libsvm-dev</depend>
+  <depend>std_msgs</depend>
+</package>
