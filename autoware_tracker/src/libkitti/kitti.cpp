@@ -157,7 +157,7 @@ int LabelsIO::ReadLabels(const std::string &filename, std::vector<TrackingLabel>
     return -1;
   }
 
-  unsigned int numObjects = 0;
+  int numObjects = 0;
 
   //read line by line
   std::string line;
@@ -234,7 +234,7 @@ int LabelsIO::ReadLabels3DOP(const std::string &filename, std::vector<TrackingLa
     return -1;
   }
 
-  unsigned int numObjects = 0;
+  int numObjects = 0;
 
   //read line by line
   std::string line;
@@ -306,7 +306,7 @@ int LabelsIO::WriteLabels(std::vector<TrackingLabel> &labels, const std::string 
   }
 
   LabelsIO sun_io;
-  unsigned int numObjects = 0;
+  int numObjects = 0;
 
   for (const auto &label:labels) {
     // Generate label string based on the value of LabelType type;
@@ -363,7 +363,7 @@ void LabelsIO::ConvertLineToMatrix(std::string &line, Eigen::Matrix<double, 3,4>
   std::vector<std::string> strings;//(3*4+1);
   boost::trim(line);
   boost::split(strings,line,boost::is_any_of(" "));
-  size_t cols,rows;
+  size_t cols = 0, rows = 0;
   unsigned char offset = 1;
   if (strings.size() == 13) {
     cols = 4; rows = 3;

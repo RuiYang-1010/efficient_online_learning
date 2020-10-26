@@ -30,7 +30,7 @@
 #include <pcl/kdtree/kdtree.h>
 
 #include <pcl/sample_consensus/method_types.h>
-#include <pcl/sample_consensus/model_types.h>
+#include <pcl-1.8/pcl/sample_consensus/model_types.h>
 
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/segmentation/extract_clusters.h>

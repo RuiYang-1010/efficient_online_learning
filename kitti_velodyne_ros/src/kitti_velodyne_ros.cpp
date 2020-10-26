@@ -92,17 +92,15 @@ int main(int argc, char **argv) {
 	}
       }
       
-      if(velodyne_pub.getNumSubscribers() > 0) {
-    	sensor_msgs::PointCloud2 pc2;
-    	pcl::toROSMsg(*cloud, pc2);
-    	pc2.header.frame_id = "velodyne";
-	if(!poses_txt.good()) {
-	  pc2.header.stamp = ros::Time::now();
-	} else {
-	  pc2.header.stamp = timestamp_ros;
-	}
-    	velodyne_pub.publish(pc2);
+      sensor_msgs::PointCloud2 pc2;
+      pcl::toROSMsg(*cloud, pc2);
+      pc2.header.frame_id = "velodyne";
+      if(!poses_txt.good()) {
+	pc2.header.stamp = ros::Time::now();
+      } else {
+	pc2.header.stamp = timestamp_ros;
       }
+      velodyne_pub.publish(pc2);
     }
     
     /*** Ground Truth Poses ***/

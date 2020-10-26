@@ -106,12 +106,10 @@ int main(int argc, char **argv) {
 	number_of_samples++;
       }
     }
-
-    features_msg.data.insert(0, std::to_string(number_of_samples) + " " + std::to_string(features_dig.size()) + " 3 1\n");
-    if(features_pub.getNumSubscribers() > 0) {
-      features_pub.publish(features_msg);
-    }
-
+    
+    features_msg.data.insert(0, std::to_string(number_of_samples) + " " + std::to_string(features_dig.size()) + " 3 1\n"); // Samples + Features + Classes + FeatureMinIndex
+    features_pub.publish(features_msg);
+    
     ros::spinOnce();
   }
 

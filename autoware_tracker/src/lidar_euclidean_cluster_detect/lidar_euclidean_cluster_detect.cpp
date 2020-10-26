@@ -212,7 +212,7 @@ void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_cluste
   {
     autoware_tracker::DetectedObject detected_object;
     detected_object.header = in_clusters.header;
-    detected_object.label = "unknown";
+    detected_object.label = "1"; //"unknown";
     detected_object.score = 1.;
     // yang21icra
     // Eigen::Vector4d min_point(in_clusters.clusters[i].min_point.point.x,
@@ -951,15 +951,15 @@ int main(int argc, char **argv)
   }
   std::string extrinsic_calibration_file = "calib.txt";
   if (nh.getParam("autoware_tracker/cluster/extrinsic_calibration", extrinsic_calibration_file)) {
-    ROS_INFO("[%s] Setting points_node to %s", __APP_NAME__, extrinsic_calibration_file.c_str());
+    ROS_INFO("[%s] Setting extrinsic_calibration to %s", __APP_NAME__, extrinsic_calibration_file.c_str());
   } else {
-    ROS_INFO("[%s] No points_node received, defaulting to calib.txt", __APP_NAME__);
+    ROS_INFO("[%s] No extrinsic_calibration received, defaulting to calib.txt", __APP_NAME__);
   }
   
   if (nh.getParam("autoware_tracker/cluster/iou_threshold", iou_threshold)) {
-    ROS_INFO("[%s] Setting points_node to %f", __APP_NAME__, iou_threshold);
+    ROS_INFO("[%s] Setting iou_threshold to %f", __APP_NAME__, iou_threshold);
   } else {
-    ROS_INFO("[%s] No points_node received, defaulting to 0.5", __APP_NAME__);
+    ROS_INFO("[%s] No iou_threshold received, defaulting to 0.5", __APP_NAME__);
   }
   
   calib = new Calibration(extrinsic_calibration_file);
