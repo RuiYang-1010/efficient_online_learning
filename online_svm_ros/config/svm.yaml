@@ -15,3 +15,5 @@ nu: 		0.5
 p: 		0.1
 shrinking: 	0
 probability: 	1
+save_data:      true
+best_params:    false

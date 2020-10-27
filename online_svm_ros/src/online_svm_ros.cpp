@@ -14,10 +14,12 @@ int main(int argc, char **argv) {
   int max_examples = 5000;
   struct svm_parameter parameter;
   struct svm_problem problem;
-  //struct svm_node *node = NULL;
   struct svm_model *model = NULL;
+  //struct svm_node *node = NULL;
   float *range[2];
   float x_lower = -1.0, x_upper = 1.0;
+  bool best_params = false;
+  bool save_data = false;
   
   ros::init(argc, argv, "online_svm_ros");
   ros::NodeHandle nh, private_nh("~");
@@ -45,6 +47,9 @@ int main(int argc, char **argv) {
     parameter.p = node["p"].as<double>();
     parameter.shrinking = node["shrinking"].as<int>();
     parameter.probability = node["probability"].as<int>();
+
+    best_params = node["best_params"].as<bool>();
+    save_data = node["save_data"].as<bool>();
   } else {
     ROS_ERROR("[%s] Failed to get param 'svm_train_params'", __APP_NAME__);
     exit(EXIT_SUCCESS);
@@ -115,18 +120,20 @@ int main(int argc, char **argv) {
       }
     }
     
-    /*** save data to file for ICRA21 ***/
-    // std::ofstream ofs;
-    // ofs.open("svm_training_data_"+std::to_string(ros::Time::now().toSec()));
-    // for(int i = 0; i < problem.l; i++) {
-    //   ofs << problem.y[i];
-    //   for(int j = 0; j < m_numFeatures; j++)
-    //     ofs << " " << problem.x[i][j].index << ":" <<  problem.x[i][j].value;
-    //   ofs << "\n";
-    // }
-    // ofs.close();
+    // save data to file
+    if(save_data) {
+      std::ofstream ofs;
+      ofs.open("svm_training_data_"+std::to_string(ros::Time::now().toSec()));
+      for(int i = 0; i < problem.l; i++) {
+	ofs << problem.y[i];
+	for(int j = 0; j < m_numFeatures; j++)
+	  ofs << " " << problem.x[i][j].index << ":" <<  problem.x[i][j].value;
+	ofs << "\n";
+      }
+      ofs.close();
+    }
     
-    /*** scale the current data ***/
+    // scale the current data
     for(int i = 0; i < m_numFeatures; i++) {
       range[0][i] = FLT_MAX; // min range
       range[1][i] = -FLT_MAX; // max range
@@ -137,12 +144,12 @@ int main(int argc, char **argv) {
     	range[1][j] = std::max(range[1][j], (float)problem.x[i][j].value);
       }
     }
-    // for(int i = 0; i < m_numFeatures; i++) { // debug print
-    //   std::cerr << "svm scale range [attribute " << i << "]: " << range[0][i] << ", " << range[1][i] << std::endl;
+    // for(int i = 0; i < m_numFeatures; i++) {
+    //   std::cout << "svm scale range [attribute " << i << "]: " << range[0][i] << ", " << range[1][i] << std::endl;
     // }
     for(int i = 0; i < problem.l; i++) {
       for(int j = 0; j < m_numFeatures; j++) {
-    	if(range[0][j] == range[1][j]) { // skip single-valued attribute
+	if(range[0][j] == range[1][j]) { // skip single-valued attribute
     	  continue;
 	}
     	if(problem.x[i][j].value == range[0][j]) {
@@ -152,48 +159,50 @@ int main(int argc, char **argv) {
     	} else {
     	  problem.x[i][j].value = x_lower + (x_upper - x_lower) * (problem.x[i][j].value - range[0][j]) / (range[1][j] - range[0][j]);
 	}
-    	//std::cerr << "training data " << i << " [attribute " << j << "]: " << problem.x[i][j].value << std::endl;
+    	//std::cout << "training data " << i << " [attribute " << j << "]: " << problem.x[i][j].value << std::endl;
       }
     }
-
-    // TODO before release
-    // if(find_the_best_training_parameters_) {
-    //   std::ofstream s;
-    //   s.open("svm_training_data");
-    //   for(int i = 0; i < problem.l; i++) {
-    // 	s << problem.y[i];
-    // 	for(int j = 0; j < m_numFeatures; j++)
-    // 	  s << " " << problem.x[i][j].index << ":" <<  problem.x[i][j].value;
-    // 	s << "\n";
-    //   }
-    //   s.close();
     
-    //   std::cerr << "Finding the best training parameters ..." << std::endl;
-    //   if(svm_check_parameter(&problem, &svm_parameter_) == NULL) {
-    // 	char result[100];
-    // 	FILE *fp = popen("./grid.py svm_training_data", "r");
-    // 	if(fp == NULL) {
-    // 	  std::cerr << "Can not run cross validation!" << std::endl;
-    // 	} else {
-    // 	  if(fgets(result, 100, fp) != NULL) {
-    // 	    char *pch = strtok(result, " ");
-    // 	    svm_parameter_.C = atof(pch); pch = strtok(NULL, " ");
-    // 	    svm_parameter_.gamma = atof(pch); pch = strtok(NULL, " ");
-    // 	    float rate = atof(pch);
-    // 	    std::cerr << "Best c=" << svm_parameter_.C << ", g=" << svm_parameter_.gamma << " CV rate=" << rate << std::endl;
-    // 	  }
-    // 	}
-    // 	pclose(fp);
-    //   }
-    // }
+    if(best_params) {
+      std::ofstream ofs;
+      ofs.open("svm_training_data_scaled");
+      for(int i = 0; i < problem.l; i++) {
+      	ofs << problem.y[i];
+      	for(int j = 0; j < m_numFeatures; j++)
+      	  ofs << " " << problem.x[i][j].index << ":" <<  problem.x[i][j].value;
+      	ofs << "\n";
+      }
+      ofs.close();
+      
+      std::cout << "Finding the best training parameters ..." << std::endl;
+      if(svm_check_parameter(&problem, &parameter) == NULL) {
+    	char result[100];
+    	FILE *fp = popen("svm-grid svm_training_data_scaled", "r");
+    	if(fp == NULL) {
+    	  std::cerr << "Can not run cross validation!" << std::endl;
+    	} else {
+    	  if(fgets(result, 100, fp) != NULL) {
+    	    char *pch = strtok(result, " ");
+    	    parameter.C = atof(pch);
+	    pch = strtok(NULL, " ");
+    	    parameter.gamma = atof(pch);
+	    pch = strtok(NULL, " ");
+    	    float rate = atof(pch);
+    	    std::cout << "Best c=" << parameter.C << ", g=" << parameter.gamma << " CV rate=" << rate << std::endl;
+    	  }
+    	}
+    	pclose(fp);
+      }
+    }
     model = svm_train(&problem, &parameter);
      
-    /*** debug saving ***/
-    // if(svm_save_model("svm_model", model) == 0) {
-    //   std::cerr << "A model has been generated here: ~/.ros/svm.model" << std::endl;
-    // }
+    if(save_data) {
+      if(svm_save_model("svm_model", model) == 0) {
+	ROS_INFO("[online_svm_ros] A model has been generated here: ~/.ros/svm.model");
+      }
+    }
     
-    std::cout << "[online_svm_ros] Training time: " << time(NULL)-start_time << "s" << std::endl;
+    std::cout << "[online_svm_ros] Training time: " << time(NULL)-start_time << " s" << std::endl;
     
     ros::spinOnce();
     
@@ -203,10 +212,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  // tidy-up
-  // if(node != NULL) {
-  //   free(node);
-  // }
+  // memory tidy-up
   svm_destroy_param(&parameter);
   free(problem.y);
   if(m_numFeatures > 0) {
@@ -218,6 +224,11 @@ int main(int argc, char **argv) {
   if(model != NULL) {
     svm_free_and_destroy_model(&model);
   }
+  free(range[0]);
+  free(range[1]);
+  // if(node != NULL) {
+  //   free(node);
+  // }
   
   return EXIT_SUCCESS;
 }
