@@ -9,12 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(yaml-cpp REQUIRED)
 
 include_directories(
-  include
   ${catkin_INCLUDE_DIRS}
-  )
-
-catkin_package(
-  INCLUDE_DIRS include
   )
 
 add_executable(online_svm_ros

@@ -10,6 +10,9 @@
 #define __APP_NAME__ "online_svm_ros"
 
 int main(int argc, char **argv) {
+  std::ofstream icra_log;
+  std::string log_name = "svm_time_log_"+std::to_string(ros::WallTime::now().toSec());
+  
   std::string svm_train_params;
   int max_examples = 5000;
   struct svm_parameter parameter;
@@ -103,7 +106,8 @@ int main(int argc, char **argv) {
     }
     
     // train
-    time_t start_time = time(NULL);
+    icra_log.open(log_name, std::ofstream::out | std::ofstream::app);
+    time_t start_time = ros::WallTime::now().toSec();
     
     for(int i = 0; i < problem.l; i++) {
       for(int j = 0; j < m_numFeatures; j++) {
@@ -123,7 +127,7 @@ int main(int argc, char **argv) {
     // save data to file
     if(save_data) {
       std::ofstream ofs;
-      ofs.open("svm_training_data_"+std::to_string(ros::Time::now().toSec()));
+      ofs.open("svm_training_data_"+std::to_string(start_time));
       for(int i = 0; i < problem.l; i++) {
 	ofs << problem.y[i];
 	for(int j = 0; j < m_numFeatures; j++)
@@ -202,7 +206,9 @@ int main(int argc, char **argv) {
       }
     }
     
-    std::cout << "[online_svm_ros] Training time: " << time(NULL)-start_time << " s" << std::endl;
+    std::cout << "[online_svm_ros] Training time: " << ros::WallTime::now().toSec() - start_time << " s" << std::endl;
+    icra_log << problem.l << " " << ros::WallTime::now().toSec()-start_time << "\n";
+    icra_log.close();
     
     ros::spinOnce();
     
