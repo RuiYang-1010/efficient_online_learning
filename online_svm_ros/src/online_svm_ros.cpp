@@ -9,6 +9,14 @@
 
 #define __APP_NAME__ "online_svm_ros"
 
+double s2d(std::string s) {
+  std::stringstream ss;
+  double d;
+  ss << s;
+  ss >> d;
+  return d;
+}
+
 int main(int argc, char **argv) {
   std::ofstream icra_log;
   std::string log_name = "svm_time_log_"+std::to_string(ros::WallTime::now().toSec());
@@ -95,7 +103,7 @@ int main(int argc, char **argv) {
     	std::getline(iss2, line, ':');
     	problem.x[problem.l][i].index = atoi(line.c_str());
 	std::getline(iss2, line, ' ');
-    	problem.x[problem.l][i].value = atof(line.c_str());
+    	problem.x[problem.l][i].value = s2d(line);
       }
       problem.x[problem.l][m_numFeatures].index = -1;
       problem.l++;
@@ -111,12 +119,13 @@ int main(int argc, char **argv) {
     
     for(int i = 0; i < problem.l; i++) {
       for(int j = 0; j < m_numFeatures; j++) {
-    	if(range[0][j] == range[1][j]) { // skip single-valued attribute
+	if(std::fabs(range[0][j] - range[1][j]) < DBL_EPSILON) { // skip single-valued attribute
     	  continue;
     	}
-    	if(problem.x[i][j].value == x_lower) {
+	
+    	if(std::fabs(problem.x[i][j].value - x_lower) < DBL_EPSILON) {
     	  problem.x[i][j].value = range[0][j];
-    	} else if(problem.x[i][j].value == x_upper) {
+    	} else if(std::fabs(problem.x[i][j].value - x_upper) < DBL_EPSILON) {
     	  problem.x[i][j].value = range[1][j];
     	} else {
     	  problem.x[i][j].value = range[0][j] + (problem.x[i][j].value - x_lower) * (range[1][j] - range[0][j]) / (x_upper - x_lower);
@@ -153,12 +162,12 @@ int main(int argc, char **argv) {
     // }
     for(int i = 0; i < problem.l; i++) {
       for(int j = 0; j < m_numFeatures; j++) {
-	if(range[0][j] == range[1][j]) { // skip single-valued attribute
+	if(std::fabs(range[0][j] - range[1][j]) < DBL_EPSILON) { // skip single-valued attribute
     	  continue;
 	}
-    	if(problem.x[i][j].value == range[0][j]) {
+    	if(std::fabs(problem.x[i][j].value - range[0][j]) < DBL_EPSILON) {
     	  problem.x[i][j].value = x_lower;
-    	} else if(problem.x[i][j].value == range[1][j]) {
+    	} else if(std::fabs(problem.x[i][j].value - range[1][j]) < DBL_EPSILON) {
     	  problem.x[i][j].value = x_upper;
     	} else {
     	  problem.x[i][j].value = x_lower + (x_upper - x_lower) * (problem.x[i][j].value - range[0][j]) / (range[1][j] - range[0][j]);
@@ -187,11 +196,11 @@ int main(int argc, char **argv) {
     	} else {
     	  if(fgets(result, 100, fp) != NULL) {
     	    char *pch = strtok(result, " ");
-    	    parameter.C = atof(pch);
+    	    parameter.C = s2d(pch);
 	    pch = strtok(NULL, " ");
-    	    parameter.gamma = atof(pch);
+    	    parameter.gamma = s2d(pch);
 	    pch = strtok(NULL, " ");
-    	    float rate = atof(pch);
+    	    float rate = s2d(pch);
     	    std::cout << "Best c=" << parameter.C << ", g=" << parameter.gamma << " CV rate=" << rate << std::endl;
     	  }
     	}
