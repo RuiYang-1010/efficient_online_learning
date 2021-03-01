@@ -2,7 +2,7 @@ autoware_tracker:
 
     cluster:
         label_source: "/image_detections"
-        extrinsic_calibration: "/home/rui/Rui/datasets/KITTI_Odometry/00/calib.txt"
+        extrinsic_calibration: "/home/epan/Rui/datasets/KITTI_Odometry/test/calib.txt"
         iou_threshold: 0.5
 
         points_node: "/points_raw"
@@ -16,11 +16,11 @@ autoware_tracker:
         use_multiple_thres: true
 
         cluster_size_min: 20
-        # cluster_size_max: 100000
-        cluster_size_max: 1000
+        cluster_size_max: 100000
         clip_min_height: -2.0
         clip_max_height: 0.0
         cluster_merge_threshold: 1.5
+        #clustering_distance: 0.75
         clustering_distance: 0.75
         remove_points_min: 2.0
         remove_points_max: 100.0

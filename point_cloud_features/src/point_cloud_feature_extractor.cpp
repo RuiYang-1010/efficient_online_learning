@@ -94,9 +94,9 @@ int main(int argc, char **argv) {
                                 }
 
                                 if(objects_msg->objects[i].label.compare("unknown") == 0) {
-                                        features_msg.data += "0";
+                                        // features_msg.data += "0";
                                 } else {
-                                        features_msg.data += objects_msg->objects[i].label; // 1:car, 2:pedestrian, 3:cyclist
+                                        features_msg.data += objects_msg->objects[i].label; // 0:car, 1:pedestrian, 2:cyclist
                                 }
 
                                 for(int j = 0; j < features_dig.size(); j++) {
