@@ -5,7 +5,7 @@
   <description>
     Online SVM.
   </description>
-  <maintainer email="zhi.yan@utbm.fr">Zhi Yan</maintainer>
+  <maintainer email="rui.yang@utbm.fr">Rui Yang</maintainer>
   <license>GPLv3</license>
   
   <url>https://github.com/yzrobot/online_learning</url>
