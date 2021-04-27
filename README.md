@@ -1,5 +1,7 @@
 # Efficient Online Transfer Learning for 3D Object Classification in Autonomous Driving #
 
+*We are actively updating this repository (especially removing hard code and adding comments) to make it easy to use. If you have any questions, please open an issue. Thanks!*
+
 This is a ROS-based efficient online learning framework for object classification in 3D LiDAR scans, taking advantage of robust multi-target tracking to avoid the need for data annotation by a human expert.
 Please watch the videos below for more details.
 
@@ -7,8 +9,6 @@ Please watch the videos below for more details.
 
 ## Install & Build
 Please read the readme file of each sub-package first and install the corresponding dependencies.
-
-Some modules are still being improved, and the licenses for other work cited are also being updated. If you have any questions, please contact me, thank you!
 
 ## Run
 ### 1. Prepare dataset
