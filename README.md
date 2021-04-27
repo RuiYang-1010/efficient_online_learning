@@ -8,6 +8,8 @@ Please watch the videos below for more details.
 # Install & Build
 Please read the readme file of each sub-package first and install the corresponding dependencies.
 
+Some modules are still being improved, and the licenses for other work cited are also being updated. If you have any questions, please contact me, thank you!
+
 # Run
 #### 1. Prepare dataset
      # Raw Data from KITTI Benchmark
