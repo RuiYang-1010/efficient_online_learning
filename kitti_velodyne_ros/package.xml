@@ -3,8 +3,11 @@
   <name>kitti_velodyne_ros</name>
   <version>0.0.1</version>
   <description>Load KITTI velodyne data, play in ROS</description>
-  <maintainer email="zhi.yan@utbm.fr">Zhi Yan</maintainer>
+  <maintainer email="rui.yang@utbm.fr">Rui Yang</maintainer>
   <license>BSD</license>
+  
+  <url>https://github.com/epan-utbm/efficient_online_learning</url>
+  <author email="zhi.yan@utbm.fr">Zhi Yan</author>
   
   <buildtool_depend>catkin</buildtool_depend>
   
