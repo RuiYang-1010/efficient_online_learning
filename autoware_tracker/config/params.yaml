@@ -2,7 +2,7 @@ autoware_tracker:
 
     cluster:
         label_source: "/image_detections"
-        extrinsic_calibration: "/home/z/Downloads/KITTI/00/calib.txt"
+        extrinsic_calibration: "/home/epan/Rui/datasets/KITTI_Raw_Data/calib_2011_09_26.txt"
         iou_threshold: 0.5
 
         points_node: "/points_raw"
@@ -44,6 +44,4 @@ autoware_tracker:
 
         tracking_frame: "/world"
         # namespace: /detection/object_tracker/
-        track_probability: 0.0
-
-
+        track_probability: 0.7

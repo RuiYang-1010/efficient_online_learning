@@ -3,7 +3,7 @@
 """
 COCO-Style Evaluations
 
-put images here datasets/your_project_name/annotations/val_set_name/*.jpg
+put images here datasets/your_project_name/val_set_name/*.jpg
 put annotations here datasets/your_project_name/annotations/instances_{val_set_name}.json
 put weights here /path/to/your/weights/*.pth
 change compound_coef
@@ -62,7 +62,7 @@ def evaluate_coco(img_path, set_name, image_ids, coco, model, threshold=0.05):
         image_info = coco.loadImgs(image_id)[0]
         image_path = img_path + image_info['file_name']
 
-        ori_imgs, framed_imgs, framed_metas = preprocess(image_path, max_size=input_sizes[compound_coef])
+        ori_imgs, framed_imgs, framed_metas = preprocess(image_path, max_size=input_sizes[compound_coef], mean=params['mean'], std=params['std'])
         x = torch.from_numpy(framed_imgs[0])
 
         if use_cuda:

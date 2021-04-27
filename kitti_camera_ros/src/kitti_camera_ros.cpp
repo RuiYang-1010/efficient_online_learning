@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
 
         ros::Rate loop_rate(frequency);
 
-        vision_msgs::Detection2DArray detection_results;
+        //vision_msgs::Detection2DArray detection_results;
 
         struct dirent **filelist;
         int n_file = scandir(camera_dir.c_str(), &filelist, NULL, alphasort);
@@ -41,14 +41,12 @@ int main(int argc, char **argv) {
 
         int i_file = 2; // 0 = . 1 = ..
         while(ros::ok() && i_file < n_file) {
-                /*** Timestamp ***/
-                // times_txt >> timestamp;
-                // ros::Time timestamp_ros(timestamp == 0 ? ros::TIME_MIN.toSec() : timestamp);
+                vision_msgs::Detection2DArray detection_results;
 
-                /*** Velodyne ***/
+                /*** Camera ***/
                 std::string s = camera_dir + filelist[i_file]->d_name;
                 std::fstream camera_txt(s.c_str(), std::ios::in | std::ios::binary);
-                //std::cerr << s.c_str() << std::endl;
+                //std::cerr << "s: " << s.c_str() << std::endl;
                 if(!camera_txt.good()) {
                         ROS_ERROR_STREAM("[kitti_camera_ros] Could not read file: " << s);
                         return EXIT_FAILURE;
@@ -70,11 +68,16 @@ int main(int argc, char **argv) {
                                 camera_txt >> result.score;
                                 detection.results.push_back(result);
                                 detection_results.detections.push_back(detection);
-                                // ROS_INFO_STREAM("[kitti_camera_ros] detection results " << detection.results[0].id);
                         }
                         camera_txt.close();
 
                         camera_pub.publish(detection_results);
+                        // ROS_INFO_STREAM("[kitti_camera_ros] detection_results.size " << detection_results.detections.size());
+                        // ROS_INFO_STREAM("--------------------------------------------");
+                        // for(int n = 0; n < detection_results.detections.size(); n++) {
+                        //   ROS_INFO_STREAM("[kitti_camera_ros] detections.label " << detection_results.detections[n].results[0].id);
+                        //   ROS_INFO_STREAM("[kitti_camera_ros] detections.score " << detection_results.detections[n].results[0].score);
+                        // }
                 }
 
                 ros::spinOnce();

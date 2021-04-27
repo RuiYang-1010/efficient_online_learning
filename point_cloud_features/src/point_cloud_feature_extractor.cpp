@@ -54,13 +54,30 @@ int main(int argc, char **argv) {
         private_nh.param<bool>("slice_feature", slice_feature, true);
         private_nh.param<bool>("intensity_distribution", intensity_distribution, true);
 
+        int number_of_samples_count = 0;
+        int number_of_car_count = 0;
+        int number_of_ped_count = 0;
+        int number_of_cyc_count = 0;
+
         while (ros::ok()) {
-                objects_msg = ros::topic::waitForMessage<autoware_tracker::DetectedObjectArray>("/autoware_tracker/tracker/examples"); // process blocked waiting
+                //objects_msg = ros::topic::waitForMessage<autoware_tracker::DetectedObjectArray>("/autoware_tracker/tracker/examples"); // process blocked waiting
+                objects_msg = ros::topic::waitForMessage<autoware_tracker::DetectedObjectArray>("/autoware_tracker/cluster/objects"); // process blocked waiting
                 std_msgs::String features_msg;
                 int number_of_samples = 0;
 
+                srand(time(0)); // Use the time function to get a "seed” value for srand
+
                 for(int i = 0; i < objects_msg->objects.size(); i++) {
                         if(objects_msg->objects[i].pointcloud.data.size()/32 >= minimum_points) {
+                                if(objects_msg->objects[i].label.compare("unknown") == 0) continue;
+                                if(objects_msg->objects[i].label.compare("0") == 0) {
+                                        int i = int(rand()%16);
+                                        if(i!=1) continue;
+                                } else if (objects_msg->objects[i].label.compare("1") == 0) {
+                                        int i= int(rand()%2);
+                                        if(i!=1) continue;
+                                }
+
                                 pcl::PointCloud<pcl::PointXYZI>::Ptr pc(new pcl::PointCloud<pcl::PointXYZI>);
                                 pcl::fromROSMsg(objects_msg->objects[i].pointcloud, *pc);
 
@@ -93,22 +110,52 @@ int main(int argc, char **argv) {
                                         features_dig.insert(features_dig.end(), intensity.begin(), intensity.end());
                                 }
 
-                                if(objects_msg->objects[i].label.compare("unknown") == 0) {
-                                        // features_msg.data += "0";
-                                } else {
-                                        features_msg.data += objects_msg->objects[i].label; // 0:car, 1:pedestrian, 2:cyclist
-                                }
+                                // if(objects_msg->objects[i].label.compare("unknown") == 0) {
+                                //         features_msg.data += "0";
+                                // } else {
+                                //         features_msg.data += objects_msg->objects[i].label; // 1:car, 2:pedestrian, 3:cyclist
+                                // }
 
+                                features_msg.data += objects_msg->objects[i].label; // 0:car, 1:pedestrian, 2:cyclist
                                 for(int j = 0; j < features_dig.size(); j++) {
                                         features_msg.data += " " + std::to_string(j+1) + ":" + std::to_string(features_dig[j]);
                                 }
+
+                                /* Save the training data as file
+                                FILE *fp=fopen("/home/epan/Rui/Efficient_Online_Learning/train-data.libsvm","at");
+                                fprintf(fp,"%d",atoi((objects_msg->objects[i].label).c_str()));
+
+                                for(int j = 0; j < features_dig.size(); j++) {
+                                        features_msg.data += " " + std::to_string(j+1) + ":" + std::to_string(features_dig[j]);
+                                        fprintf(fp," %d",j+1);
+                                        fprintf(fp,"%s",":");
+                                        fprintf(fp,"%f",features_dig[j]);
+                                }
+                                fprintf(fp,"\n");
+                                fclose(fp); */
+
                                 features_msg.data += "\n";
+
+                                if(objects_msg->objects[i].label.compare("0") == 0) {
+                                        number_of_car_count++;
+                                } else if (objects_msg->objects[i].label.compare("1") == 0) {
+                                        number_of_ped_count++;
+                                } else if (objects_msg->objects[i].label.compare("2") == 0) {
+                                        number_of_cyc_count++;
+                                }
+                                number_of_samples_count++;
                                 number_of_samples++;
                         }
                 }
 
                 features_msg.data.insert(0, std::to_string(number_of_samples) + " " + std::to_string(features_dig.size()) + " 3 1\n"); // Samples + Features + Classes + FeatureMinIndex
-                features_pub.publish(features_msg);
+                if(number_of_samples > 0) {
+                        features_pub.publish(features_msg);
+                }
+                // std::cerr<<"number_of_samples_count : "<<number_of_samples_count<<std::endl;
+                // std::cerr<<"number_of_car_count : "<<number_of_car<<std::endl;
+                // std::cerr<<"number_of_ped_count : "<<number_of_ped<<std::endl;
+                // std::cerr<<"number_of_cyc_count : "<<number_of_cyc<<std::endl;
 
                 ros::spinOnce();
         }

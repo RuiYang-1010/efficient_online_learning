@@ -1,5 +1,5 @@
 <launch>
   <node pkg="kitti_camera_ros" type="kitti_camera_ros" name="kitti_camera_ros" output="screen" respawn="false">
-    <param name="camera_dir" type="string" value="/home/epan/Rui/datasets/KITTI_Odometry/test/txt/"/>
+    <param name="camera_dir" type="string" value="/home/epan/Rui/datasets/KITTI_Odometry_/txt/"/>
   </node>
 </launch>

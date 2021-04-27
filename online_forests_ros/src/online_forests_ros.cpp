@@ -12,7 +12,7 @@
 int main(int argc, char **argv) {
   std::ofstream icra_log;
   std::string log_name = "orf_time_log_"+std::to_string(ros::WallTime::now().toSec());
-  
+
   std::string conf_file_name;
   std::string model_file_name;
   int mode; // 1 - train, 2 - test, 3 - train and test.
@@ -59,20 +59,20 @@ int main(int argc, char **argv) {
     DataSet dataset_ts;
     // dataset_ts.loadLIBSVM(hp.testData);
 
-    if(atoi(features->data.substr(0, features->data.find(" ")).c_str()) > minimum_samples) {
+    if(atoi(features->data.substr(0, features->data.find(" ")).c_str()) >= minimum_samples) {
       OnlineRF model(hp, dataset_tr.m_numClasses, dataset_tr.m_numFeatures, dataset_tr.m_minFeatRange, dataset_tr.m_maxFeatRange); // TOTEST: OnlineTree
 
       //string model_file_name = "";
       icra_log.open(log_name, std::ofstream::out | std::ofstream::app);
       time_t start_time = ros::WallTime::now().toSec();
-      
+
       switch(mode) {
       case 1: // train only
         if(access( model_file_name.c_str(), F_OK ) != -1){
           model.loadForest(model_file_name);
         }
         model.train(dataset_tr);
-        model.writeForest(model_file_name);
+        //model.writeForest(model_file_name);
         break;
       case 2: // test only
         model.loadForest(model_file_name);
@@ -84,12 +84,12 @@ int main(int argc, char **argv) {
       default:
         ROS_ERROR("Unknown 'mode'");
       }
-      
+
       std::cout << "[online_forests_ros] Training time: " << ros::WallTime::now().toSec() - start_time << " s" << std::endl;
       icra_log << (total_samples+=dataset_tr.m_numSamples) << " " << ros::WallTime::now().toSec()-start_time << "\n";
       icra_log.close();
     }
-    
+
     ros::spinOnce();
   }
 
