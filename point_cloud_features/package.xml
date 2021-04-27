@@ -5,7 +5,7 @@
   <description>
     A ROS package for extracting features from 3D point clouds.
   </description>
-  <maintainer email="zhi.yan@utbm.fr">Zhi Yan</maintainer>
+  <maintainer email="rui.yang@utbm.fr">Rui Yang</maintainer>
   <license>BSD</license>
 
   <url>https://github.com/yzrobot/online_learning</url>
