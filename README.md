@@ -5,23 +5,40 @@ Please watch the videos below for more details.
 
 [![YouTube Video 1](https://img.youtube.com/vi/wl5ehOFV5Ac/0.jpg)](https://www.youtube.com/watch?v=wl5ehOFV5Ac)
 
-# Install & Build
+## Install & Build
 Please read the readme file of each sub-package first and install the corresponding dependencies.
 
 Some modules are still being improved, and the licenses for other work cited are also being updated. If you have any questions, please contact me, thank you!
 
-# Run
-#### 1. Prepare dataset
+## Run
+### 1. Prepare dataset
      # Raw Data from KITTI Benchmark
      # Image Pre-detection Data by running efficient_det_node.py (optional)
 
-#### 2. Manual set specific path parameters
+### 2. Manual set specific path parameters
      # launch/efficient_online_learning
      # autoware_tracker/config/params.yaml
 
-#### 3. Run the project
+### 3. Run the project
 ```bash
 $ cd catkin_ws
 $ source devel/setup.bash
 $ roslaunch src/efficient_online_learning/launch/efficient_online_learning.launch
+```
+
+## Citation ##
+
+If you are considering using this code, please reference the following:
+
+```
+@article{efficient_online_learning,
+   author = {Rui Yang and Zhi Yan and Tao Yang and Yassine Ruichek},
+   title = {Efficient Online Transfer Learning for 3D Object Classification in Autonomous Driving},
+   journal = {CoRR},
+   volume = {abs/2104.10037},
+   year = {2021},
+   url = {http://arxiv.org/abs/2104.10037},
+   archivePrefix = {arXiv},
+   eprint = {2104.10037}
+}
 ```
