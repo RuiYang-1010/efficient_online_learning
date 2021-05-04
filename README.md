@@ -12,8 +12,8 @@ Please read the readme file of each sub-package first and install the correspond
 
 ## Run
 ### 1. Prepare dataset
-     # Raw Data from KITTI Benchmark
-     # Image Pre-detection Data by running efficient_det_node.py (optional)
+     # You can use the raw data download from KITTI.
+     # Or you can download a [sample data](https://github.com/epan-utbm/efficient_online_learning/releases/download/sample_data/2011_09_26_drive_0005_sync.tar)
 
 ### 2. Manual set specific path parameters
      # launch/efficient_online_learning
@@ -26,7 +26,7 @@ $ source devel/setup.bash
 $ roslaunch src/efficient_online_learning/launch/efficient_online_learning.launch
 ```
 
-## Citation ##
+## Citation
 
 If you are considering using this code, please reference the following:
 
