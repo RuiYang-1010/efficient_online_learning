@@ -101,17 +101,17 @@ private:
   ros::NodeHandle private_nh_;
   ros::Subscriber sub_detected_array_;
   ros::Publisher pub_object_array_;
-  //yang21icra
+  //yang21itsc
   ros::Publisher pub_example_array_;
   ros::Publisher vis_examples_;
-  //yang21icra
+  //yang21itsc
   
   std_msgs::Header input_header_;
 
-  // yang21icra
+  // yang21itsc
   std::vector<autoware_tracker::DetectedObjectArray> learning_buffer;
   double track_probability_;
-  // yang21icra
+  // yang21itsc
 
   void callback(const autoware_tracker::DetectedObjectArray& input);
 

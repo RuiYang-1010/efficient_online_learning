@@ -70,13 +70,15 @@ int main(int argc, char **argv) {
                 for(int i = 0; i < objects_msg->objects.size(); i++) {
                         if(objects_msg->objects[i].pointcloud.data.size()/32 >= minimum_points) {
                                 if(objects_msg->objects[i].label.compare("unknown") == 0) continue;
-                                if(objects_msg->objects[i].label.compare("0") == 0) {
-                                        int i = int(rand()%16);
-                                        if(i!=1) continue;
-                                } else if (objects_msg->objects[i].label.compare("1") == 0) {
-                                        int i= int(rand()%2);
-                                        if(i!=1) continue;
-                                }
+
+                                // downsampling for training
+                                // if(objects_msg->objects[i].label.compare("0") == 0) {
+                                //         int i = int(rand()%16);
+                                //         if(i!=1) continue;
+                                // } else if (objects_msg->objects[i].label.compare("1") == 0) {
+                                //         int i= int(rand()%2);
+                                //         if(i!=1) continue;
+                                // }
 
                                 pcl::PointCloud<pcl::PointXYZI>::Ptr pc(new pcl::PointCloud<pcl::PointXYZI>);
                                 pcl::fromROSMsg(objects_msg->objects[i].pointcloud, *pc);

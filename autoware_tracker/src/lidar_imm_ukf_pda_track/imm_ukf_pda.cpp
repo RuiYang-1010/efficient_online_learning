@@ -51,18 +51,18 @@ ImmUkfPda::ImmUkfPda()
                 std::remove(result_file_path_.c_str());
         }
 
-        //yang21icra
+        //yang21itsc
         private_nh_.param<double>("autoware_tracker/tracker/track_probability", track_probability_, 0.7);
-        //yang21icra
+        //yang21itsc
 }
 
 void ImmUkfPda::run()
 {
         pub_object_array_ = node_handle_.advertise<autoware_tracker::DetectedObjectArray>("autoware_tracker/tracker/objects", 1);
-        //yang21icra
+        //yang21itsc
         pub_example_array_ = node_handle_.advertise<autoware_tracker::DetectedObjectArray>("autoware_tracker/tracker/examples", 100);
         vis_examples_ = node_handle_.advertise<sensor_msgs::PointCloud2>("autoware_tracker/tracker/vis_examples", 100);
-        //yang21icra
+        //yang21itsc
         sub_detected_array_ = node_handle_.subscribe("autoware_tracker/cluster/objects", 1, &ImmUkfPda::callback, this);
 
         if (use_vectormap_)
@@ -102,7 +102,7 @@ void ImmUkfPda::callback(const autoware_tracker::DetectedObjectArray& input)
                 dumpResultText(detected_objects_output);
         }
 
-        // yang21icra
+        // yang21itsc
         for(size_t i = 0; i < learning_buffer.size(); i++) {
                 learning_buffer[i].objects.back().last_sample = true;
         }
@@ -193,7 +193,7 @@ void ImmUkfPda::callback(const autoware_tracker::DetectedObjectArray& input)
                         learning_buffer.erase(learning_buffer.begin()+i);
                 }
         }
-        // yang21icra
+        // yang21itsc
 }
 
 // void ImmUkfPda::checkVectormapSubscription()

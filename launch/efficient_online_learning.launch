@@ -2,16 +2,16 @@
 <launch>
   <!-- Point Cloud Source -->
   <node pkg="kitti_velodyne_ros" type="kitti_velodyne_ros" name="kitti_velodyne_ros" output="screen" respawn="false">
-    <param name="velodyne_dir" type="string" value="/media/epan/b405c51d-a20a-484c-b2a1-b6755e4534e7/Data/KITTI_Raw_Data/2011_09_26/2011_09_26_drive_0091_sync/velodyne_points/data/"/>
-    <!-- <param name="poses_file" type="string" value="poses.txt"/> -->
-    <param name="times_file" type="string" value="/media/epan/b405c51d-a20a-484c-b2a1-b6755e4534e7/Data/KITTI_Raw_Data/2011_09_26/2011_09_26_drive_0091_sync/velodyne_points/timestamps.txt"/>
+    <param name="velodyne_dir" type="string" value="/home/epan/Rui/datasets/2011_09_26_drive_0005_sync/velodyne_points/data/"/>
+    <param name="times_file" type="string" value="/home/epan/Rui/datasets/2011_09_26_drive_0005_sync/velodyne_points/timestamps.txt"/>
     <param name="frequency" type="double" value="5"/>
     <remap from="/kitti_velodyne_ros/velodyne_points" to="/points_raw"/>
+    <!-- <param name="poses_file" type="string" value="poses.txt"/> -->
   </node>
 
   <!-- Image Detections -->
   <node pkg="kitti_camera_ros" type="kitti_camera_ros" name="kitti_camera_ros" output="screen" respawn="false">
-    <param name="camera_dir" type="string" value="/media/epan/b405c51d-a20a-484c-b2a1-b6755e4534e7/Data/KITTI_Raw_Data/2011_09_26/2011_09_26_drive_0091_sync/txt/"/>
+    <param name="camera_dir" type="string" value="/home/epan/Rui/datasets/2011_09_26_drive_0005_sync/txt/"/>
     <param name="frequency" type="double" value="5"/>
   </node>
 

@@ -68,21 +68,21 @@
 
 #include "cluster.h"
 
-// yang21icra
+// yang21itsc
 #include <vision_msgs/Detection2DArray.h>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <algorithm>
 #include "../libkitti/kitti.h"
-// yang21icra
+// yang21itsc
 
 #define __APP_NAME__ "euclidean_clustering"
 
-// yang21icra
+// yang21itsc
 Calibration *calib;
 float iou_threshold = 0.5;
-// yang21icra
+// yang21itsc
 
 using namespace cv;
 
@@ -193,7 +193,7 @@ void transformBoundingBox(const jsk_recognition_msgs::BoundingBox &in_boundingbo
     out_boundingbox.label = in_boundingbox.label;
 }
 
-// yang21icra
+// yang21itsc
 // y = P_rect_2 * R0_rect * Tr_velo_to_cam * x
 Eigen::Vector3d projection(const Eigen::Vector4d &point) {
   Eigen::Vector3d projected_point = calib->GetProjCam2() * calib->getR_rect() * calib->getTr_velo_cam() * point;
@@ -201,7 +201,7 @@ Eigen::Vector3d projection(const Eigen::Vector4d &point) {
 			 int(projected_point[1] / projected_point[2] + 0.5),
 			 1);
 }
-// yang21icra
+// yang21itsc
 
 void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_clusters)
 {
@@ -214,7 +214,7 @@ void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_cluste
     detected_object.header = in_clusters.header;
     detected_object.label = "1"; //"unknown";
     detected_object.score = 1.;
-    // yang21icra
+    // yang21itsc
     // Eigen::Vector4d min_point(in_clusters.clusters[i].min_point.point.x,
     // 			      in_clusters.clusters[i].min_point.point.y,
     // 			      in_clusters.clusters[i].min_point.point.z,
@@ -256,7 +256,7 @@ void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_cluste
     // 	}
     //   }
     // }
-    // yang21icra
+    // yang21itsc
     detected_object.space_frame = in_clusters.header.frame_id;
     detected_object.pose = in_clusters.clusters[i].bounding_box.pose;
     detected_object.dimensions = in_clusters.clusters[i].dimensions;
@@ -942,7 +942,7 @@ int main(int argc, char **argv)
   } else {
     ROS_INFO("[%s] No points_node received, defaulting to /points_raw", __APP_NAME__);
   }
-  // yang21icra
+  // yang21itsc
   std::string image_detections_topic = "/image_detections";
   if (nh.getParam("autoware_tracker/cluster/label_source", image_detections_topic)) {
     ROS_INFO("[%s] Setting label_source to %s", __APP_NAME__, image_detections_topic.c_str());
@@ -963,7 +963,7 @@ int main(int argc, char **argv)
   }
   
   calib = new Calibration(extrinsic_calibration_file);
-  // yang21icra
+  // yang21itsc
   
   _use_diffnormals = false;
   if (nh.getParam("autoware_tracker/cluster/use_diffnormals", _use_diffnormals)) {
@@ -1027,7 +1027,7 @@ int main(int argc, char **argv)
   // Create a ROS subscriber for the input point cloud
   ros::Subscriber sub = nh.subscribe(points_topic, 1, velodyne_callback);
   
-  // yang21icra
+  // yang21itsc
   // message_filters::Subscriber<sensor_msgs::PointCloud2> points_sub(nh, points_topic, 1);
   // message_filters::Subscriber<vision_msgs::Detection2DArray> image_detections_sub(nh, image_detections_topic, 1);
 
@@ -1035,7 +1035,7 @@ int main(int argc, char **argv)
   // // ApproximateTime takes a queue size as its constructor argument, hence MySyncPolicy(10)
   // message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), points_sub, image_detections_sub);
   // sync.registerCallback(boost::bind(&velodyne_callback, _1, _2));
-  // yang21icra
+  // yang21itsc
   
   // Spin
   ros::spin();

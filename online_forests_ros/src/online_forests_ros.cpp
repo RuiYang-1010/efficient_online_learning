@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
           model.loadForest(model_file_name);
         }
         model.train(dataset_tr);
-        //model.writeForest(model_file_name);
+        //model.writeForest(model_file_name); //turning off the writing function
         break;
       case 2: // test only
         model.loadForest(model_file_name);

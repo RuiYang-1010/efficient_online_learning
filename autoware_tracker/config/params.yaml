@@ -2,7 +2,7 @@ autoware_tracker:
 
     cluster:
         label_source: "/image_detections"
-        extrinsic_calibration: "/home/epan/Rui/datasets/KITTI_Raw_Data/calib_2011_09_26.txt"
+        extrinsic_calibration: "/home/epan/Rui/datasets/2011_09_26_drive_0005_sync/calib_2011_09_26.txt"
         iou_threshold: 0.5
 
         points_node: "/points_raw"

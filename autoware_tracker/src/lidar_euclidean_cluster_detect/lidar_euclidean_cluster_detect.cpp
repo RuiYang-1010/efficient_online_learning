@@ -68,7 +68,7 @@
 
 #include "cluster.h"
 
-// yang21icra
+// yang21itsc
 #include <vision_msgs/Detection2DArray.h>
 #include <message_filters/subscriber.h>
 // #include <message_filters/cache.h>
@@ -76,14 +76,14 @@
 #include <message_filters/sync_policies/approximate_time.h>
 #include <algorithm>
 #include "../libkitti/kitti.h"
-// yang21icra
+// yang21itsc
 
 #define __APP_NAME__ "euclidean_clustering"
 
-// yang21icra
+// yang21itsc
 Calibration *calib;
 float iou_threshold = 0.5;
-// yang21icra
+// yang21itsc
 
 using namespace cv;
 
@@ -194,7 +194,7 @@ void transformBoundingBox(const jsk_recognition_msgs::BoundingBox &in_boundingbo
         out_boundingbox.label = in_boundingbox.label;
 }
 
-// yang21icra
+// yang21itsc
 /* y = P_rect_2 * R0_rect * Tr_velo_to_cam * x
 Eigen::Vector3d projection(const Eigen::Vector4d &point) {
         Eigen::Vector3d projected_point = calib->GetProjCam2() * calib->getR_rect() * calib->getTr_velo_cam() * point;
@@ -209,157 +209,7 @@ Eigen::Vector3d projection(const Eigen::Vector4d &point) {
                                float(projected_point[1] / projected_point[2]),
                                1);
 }
-// yang21icra
-/* orignal publishDetectedObjects
-   void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_clusters,
-                            const vision_msgs::Detection2DArrayConstPtr& in_image_detections)
-   {
-        autoware_tracker::DetectedObjectArray detected_objects;
-        detected_objects.header = in_clusters.header;
-
-        for(size_t i = 0; i < in_clusters.clusters.size(); i++) {
-                // Size limitation is not reasonable, but it can increase fps.
-                if(in_clusters.clusters[i].max_point.point.x - in_clusters.clusters[i].min_point.point.x < 0.1 ||
-                   in_clusters.clusters[i].max_point.point.x - in_clusters.clusters[i].min_point.point.x > 5.0 ||
-                   in_clusters.clusters[i].max_point.point.y - in_clusters.clusters[i].min_point.point.y < 0.1 ||
-                   in_clusters.clusters[i].max_point.point.y - in_clusters.clusters[i].min_point.point.y > 5.0 ||
-                   in_clusters.clusters[i].max_point.point.z - in_clusters.clusters[i].min_point.point.z < 0.1 ||
-                   in_clusters.clusters[i].max_point.point.z - in_clusters.clusters[i].min_point.point.z > 5.0) continue;
-
-                autoware_tracker::DetectedObject detected_object;
-                detected_object.header = in_clusters.header;
-                detected_object.label = "unknown";
-                detected_object.score = 1.;
-
-                // yang21icra
-                // Bug 3D bbox to 2D
-                // Eigen::Vector4d min_point(in_clusters.clusters[i].min_point.point.x,
-                //            in_clusters.clusters[i].min_point.point.y,
-                //            in_clusters.clusters[i].min_point.point.z,
-                //            1);
-                // Eigen::Vector4d max_point(in_clusters.clusters[i].max_point.point.x,
-                //            in_clusters.clusters[i].max_point.point.y,
-                //            in_clusters.clusters[i].max_point.point.z,
-                //            1);
-                // Eigen::Vector3d projected_min_point = projection(min_point);
-                // Eigen::Vector3d projected_max_point = projection(max_point);
-                std::vector<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d> > vertices_3dbox;
-                Eigen::Vector4d left_back_down(in_clusters.clusters[i].centroid_point.point.x - in_clusters.clusters[i].dimensions.x/2, in_clusters.clusters[i].centroid_point.point.y - in_clusters.clusters[i].dimensions.y/2, in_clusters.clusters[i].centroid_point.point.z - in_clusters.clusters[i].dimensions.z/2, 1);
-                Eigen::Vector4d right_back_down(in_clusters.clusters[i].centroid_point.point.x + in_clusters.clusters[i].dimensions.x/2, in_clusters.clusters[i].centroid_point.point.y - in_clusters.clusters[i].dimensions.y/2, in_clusters.clusters[i].centroid_point.point.z - in_clusters.clusters[i].dimensions.z/2, 1);
-                Eigen::Vector4d right_front_down(in_clusters.clusters[i].centroid_point.point.x + in_clusters.clusters[i].dimensions.x/2, in_clusters.clusters[i].centroid_point.point.y + in_clusters.clusters[i].dimensions.y/2, in_clusters.clusters[i].centroid_point.point.z - in_clusters.clusters[i].dimensions.z/2, 1);
-                Eigen::Vector4d left_front_down(in_clusters.clusters[i].centroid_point.point.x - in_clusters.clusters[i].dimensions.x/2, in_clusters.clusters[i].centroid_point.point.y + in_clusters.clusters[i].dimensions.y/2, in_clusters.clusters[i].centroid_point.point.z - in_clusters.clusters[i].dimensions.z/2, 1);
-                Eigen::Vector4d left_back_up(in_clusters.clusters[i].centroid_point.point.x - in_clusters.clusters[i].dimensions.x/2, in_clusters.clusters[i].centroid_point.point.y - in_clusters.clusters[i].dimensions.y/2, in_clusters.clusters[i].centroid_point.point.z + in_clusters.clusters[i].dimensions.z/2, 1);
-                Eigen::Vector4d right_back_up(in_clusters.clusters[i].centroid_point.point.x + in_clusters.clusters[i].dimensions.x/2, in_clusters.clusters[i].centroid_point.point.y - in_clusters.clusters[i].dimensions.y/2, in_clusters.clusters[i].centroid_point.point.z + in_clusters.clusters[i].dimensions.z/2, 1);
-                Eigen::Vector4d right_front_up(in_clusters.clusters[i].centroid_point.point.x + in_clusters.clusters[i].dimensions.x/2, in_clusters.clusters[i].centroid_point.point.y + in_clusters.clusters[i].dimensions.y/2, in_clusters.clusters[i].centroid_point.point.z + in_clusters.clusters[i].dimensions.z/2, 1);
-                Eigen::Vector4d left_front_up(in_clusters.clusters[i].centroid_point.point.x - in_clusters.clusters[i].dimensions.x/2, in_clusters.clusters[i].centroid_point.point.y + in_clusters.clusters[i].dimensions.y/2, in_clusters.clusters[i].centroid_point.point.z + in_clusters.clusters[i].dimensions.z/2, 1);
-                vertices_3dbox.push_back(left_back_down);
-                vertices_3dbox.push_back(right_back_down);
-                vertices_3dbox.push_back(right_front_down);
-                vertices_3dbox.push_back(left_front_down);
-                vertices_3dbox.push_back(left_back_up);
-                vertices_3dbox.push_back(right_back_up);
-                vertices_3dbox.push_back(right_front_up);
-                vertices_3dbox.push_back(left_front_up);
-
-                std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> > projected_vertices;
-                //std::cerr << "-------MUST BE 8-------vertices_3dbox.size() = " << vertices_3dbox.size() << std::endl;
-                for(size_t j = 0; j < vertices_3dbox.size(); j++) {
-                        projected_vertices.push_back(projection(vertices_3dbox[j]));
-                }
-                Eigen::Vector3d projected_min_point(DBL_MAX, DBL_MAX, 1);
-                Eigen::Vector3d projected_max_point(-DBL_MAX, -DBL_MAX, 1);
-                for(size_t j = 0; j < projected_vertices.size(); j++) {
-                        if(projected_min_point[0] > projected_vertices[j][0]) {
-                                projected_min_point[0] = projected_vertices[j][0];
-                        }
-                        if(projected_min_point[1] > projected_vertices[j][1]) {
-                                projected_min_point[1] = projected_vertices[j][1];
-                        }
-                        if(projected_max_point[0] < projected_vertices[j][0]) {
-                                projected_max_point[0] = projected_vertices[j][0];
-                        }
-                        if(projected_max_point[1] < projected_vertices[j][1]) {
-                                projected_max_point[1] = projected_vertices[j][1];
-                        }
-                }
-                //std::cerr << "-------projected_vertices = " << projected_min_point[0] << " " << projected_min_point[1] << " " << projected_max_point[0] << " " << projected_max_point[1] << std::endl;
-
-                float iou_max = 0;
-                float inter_area_per_max = 0;
-                for(size_t j = 0; j < in_image_detections->detections.size(); j++) {
-                        if(in_image_detections->detections[j].results[0].score > 0.7) {
-                                int im_min_x = in_image_detections->detections[j].bbox.center.x - (in_image_detections->detections[j].bbox.size_x / 2);
-                                int im_min_y = in_image_detections->detections[j].bbox.center.y - (in_image_detections->detections[j].bbox.size_y / 2);
-                                int im_max_x = in_image_detections->detections[j].bbox.center.x + (in_image_detections->detections[j].bbox.size_x / 2);
-                                int im_max_y = in_image_detections->detections[j].bbox.center.y + (in_image_detections->detections[j].bbox.size_y / 2);
-
-                                int x0 = std::max(int(projected_min_point[0]), im_min_x);
-                                int y0 = std::max(int(projected_min_point[1]), im_min_y);
-                                int x1 = std::min(int(projected_max_point[0]), im_max_x);
-                                int y1 = std::min(int(projected_max_point[1]), im_max_y);
-
-                                int inter_area = std::abs(std::max(x1-x0, 0) * std::max(y1-y0, 0));
-                                // if(inter_area > 0) {
-                                //         int box0 = std::abs(int(projected_max_point[0] - projected_min_point[0]) *
-                                //                             int(projected_max_point[1] - projected_min_point[1]));
-                                //         int box1 = std::abs(int(im_max_x - im_min_x) *
-                                //                             int(im_max_y - im_min_y));
-                                //
-                                //         // float inter_area_per = inter_area / float(std::abs(in_image_detections->detections[j].bbox.size_x * in_image_detections->detections[j].bbox.size_y));
-                                //         float inter_area_per = inter_area / float(box1);
-                                //
-                                //         if(inter_area_per > inter_area_per_max) {
-                                //                 inter_area_per_max = inter_area_per;
-                                //                 if(inter_area_per_max > 0.5) {
-                                //                         detected_object.label = std::to_string(in_image_detections->detections[j].results[0].id); // 0:car, 1:pedestrian, 2:cyclist
-                                //                         //detected_object.score = in_image_detections->detections[j].results[0].score;
-                                //                         std::cerr << "inter_area: " << inter_area << "-------" << "inter_area_per: " << inter_area_per << std::endl;
-                                //                 }
-                                //         }
-                                //
-                                //         float iou = inter_area / float(box0 + box1 - inter_area);
-                                //         if(iou > iou_max) {
-                                //                 iou_max = iou;
-                                //                 if(iou_max > iou_threshold) {
-                                //                         detected_object.label = std::to_string(in_image_detections->detections[j].results[0].id); // 0:car, 1:pedestrian, 2:cyclist
-                                //                         //detected_object.score = in_image_detections->detections[j].results[0].score;
-                                //                         std::cerr << "IOU: " << iou << std::endl;
-                                //                 }
-                                //         }
-                                // }
-                                if(inter_area > 0) {
-                                        int box0 = std::abs(int(projected_max_point[0] - projected_min_point[0]) *
-                                                            int(projected_max_point[1] - projected_min_point[1]));
-                                        int box1 = std::abs(int(im_max_x - im_min_x) *
-                                                            int(im_max_y - im_min_y));
-                                        float iou = inter_area / float(box0 + box1 - inter_area);
-                                        if(iou > iou_max) {
-                                                iou_max = iou;
-                                                if(iou_max > iou_threshold) {
-                                                        detected_object.label = std::to_string(in_image_detections->detections[j].results[0].id); // 0:car, 1:pedestrian, 2:cyclist
-                                                        //detected_object.score = in_image_detections->detections[j].results[0].score;
-                                                        std::cerr << "IOU: " << iou << std::endl;
-                                                }
-                                        }
-                                }
-
-                        }
-                }
-
-                // yang21icra
-
-                detected_object.space_frame = in_clusters.header.frame_id;
-                detected_object.pose = in_clusters.clusters[i].bounding_box.pose;
-                detected_object.dimensions = in_clusters.clusters[i].dimensions;
-                detected_object.pointcloud = in_clusters.clusters[i].cloud;
-                detected_object.convex_hull = in_clusters.clusters[i].convex_hull;
-                detected_object.valid = true;
-
-                detected_objects.objects.push_back(detected_object);
-        }
-        _pub_detected_objects.publish(detected_objects);
-   } */
-
+// yang21itsc
 void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_clusters,
                             const vision_msgs::Detection2DArrayConstPtr& in_image_detections)
 {
@@ -375,12 +225,12 @@ void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_cluste
                 //    in_clusters.clusters[i].max_point.point.z - in_clusters.clusters[i].min_point.point.z < 0.1 ||
                 //    in_clusters.clusters[i].max_point.point.z - in_clusters.clusters[i].min_point.point.z > 5.0) continue;
 
-                   if(in_clusters.clusters[i].bounding_box.dimensions.x < 0.1
-                   || in_clusters.clusters[i].bounding_box.dimensions.x > 5.0
-                   || in_clusters.clusters[i].bounding_box.dimensions.y < 0.1
-                   || in_clusters.clusters[i].bounding_box.dimensions.y > 5.0
-                   || in_clusters.clusters[i].bounding_box.dimensions.z < 0.1
-                   || in_clusters.clusters[i].bounding_box.dimensions.z > 5) continue;
+                if(in_clusters.clusters[i].bounding_box.dimensions.x < 0.1
+                || in_clusters.clusters[i].bounding_box.dimensions.x > 5.0
+                || in_clusters.clusters[i].bounding_box.dimensions.y < 0.1
+                || in_clusters.clusters[i].bounding_box.dimensions.y > 5.0
+                || in_clusters.clusters[i].bounding_box.dimensions.z < 0.1
+                || in_clusters.clusters[i].bounding_box.dimensions.z > 5) continue;
 
                 autoware_tracker::DetectedObject detected_object;
                 detected_object.header = in_clusters.header;
@@ -424,6 +274,7 @@ void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_cluste
                 // vertices_3dbox.push_back(left_front_up);
 
                 std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> > projected_vertices;
+                //std::cerr << "-------MUST BE 8-------vertices_3dbox.size() = " << vertices_3dbox.size() << std::endl;
                 for(size_t j = 0; j < vertices_3dbox.size(); j++) {
                         projected_vertices.push_back(projection(vertices_3dbox[j]));
                 }
@@ -514,7 +365,8 @@ void publishDetectedObjects(const autoware_tracker::CloudClusterArray &in_cluste
         }
 
         _pub_detected_objects.publish(detected_objects);
-}    // yang21icra
+}
+// yang21itsc
 
 void publishCloudClusters(const ros::Publisher *in_publisher, const autoware_tracker::CloudClusterArray &in_clusters,
                           const std::string &in_target_frame, const std_msgs::Header &in_header,
@@ -1193,7 +1045,7 @@ int main(int argc, char **argv)
         } else {
                 ROS_INFO("[%s] No points_node received, defaulting to /points_raw", __APP_NAME__);
         }
-        // yang21icra
+        // yang21itsc
         std::string image_detections_topic = "/image_detections";
         if (nh.getParam("autoware_tracker/cluster/label_source", image_detections_topic)) {
                 ROS_INFO("[%s] Setting label_source to %s", __APP_NAME__, image_detections_topic.c_str());
@@ -1214,7 +1066,7 @@ int main(int argc, char **argv)
         }
 
         calib = new Calibration(extrinsic_calibration_file);
-        // yang21icra
+        // yang21itsc
 
         _use_diffnormals = false;
         if (nh.getParam("autoware_tracker/cluster/use_diffnormals", _use_diffnormals)) {
@@ -1278,7 +1130,7 @@ int main(int argc, char **argv)
         // Create a ROS subscriber for the input point cloud
         //ros::Subscriber sub = nh.subscribe(points_topic, 1, velodyne_callback);
 
-        // yang21icra
+        // yang21itsc
         message_filters::Subscriber<sensor_msgs::PointCloud2> points_sub(nh, points_topic, 1);
         message_filters::Subscriber<vision_msgs::Detection2DArray> image_detections_sub(nh, image_detections_topic, 1);
         //message_filters::Cache<vision_msgs::Detection2DArray> image_detections_cache(image_detections_sub, 100);
@@ -1288,7 +1140,7 @@ int main(int argc, char **argv)
         // ApproximateTime takes a queue size as its constructor argument, hence MySyncPolicy(10)
         message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), points_sub, image_detections_sub);
         sync.registerCallback(boost::bind(&velodyne_callback, _1, _2));
-        // yang21icra
+        // yang21itsc
 
         // Spin
         ros::spin();

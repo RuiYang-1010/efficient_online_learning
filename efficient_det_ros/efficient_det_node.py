@@ -38,6 +38,12 @@ cudnn.benchmark = True
 
 color_list = standard_to_bgr(STANDARD_COLORS)
 
+img_path = '/home/epan/Rui/datasets/2011_09_26_drive_0005_sync/img'
+txt_path = '/home/epan/Rui/datasets/2011_09_26_drive_0005_sync/txt'
+
+path = '/home/epan/Rui/datasets/2011_09_26_drive_0005_sync/image_02/data'
+stamp_path = '/home/epan/Rui/datasets/2011_09_26_drive_0005_sync/image_02/timestamps.txt'
+
 
 def display(cur_frame, preds, imgs, imshow=True, imwrite=False):
     for i in range(len(imgs)):
@@ -58,10 +64,10 @@ def display(cur_frame, preds, imgs, imshow=True, imwrite=False):
             #cv2.waitKey(0)
 
         if imwrite:
-            if not os.path.exists('/media/epan/b405c51d-a20a-484c-b2a1-b6755e4534e7/Data/KITTI_Raw_Data/img'):
-                os.makedirs('/media/epan/b405c51d-a20a-484c-b2a1-b6755e4534e7/Data/KITTI_Raw_Data/img')
+            if not os.path.exists(img_path):
+                os.makedirs(img_path)
             cv2.imwrite(
-                f'/media/epan/b405c51d-a20a-484c-b2a1-b6755e4534e7/Data/KITTI_Raw_Data/img/img_inferred_d{compound_coef}_this_repo_{cur_frame}.jpg', imgs[i])
+                f'{img_path}/img_inferred_d{compound_coef}_this_repo_{cur_frame}.jpg', imgs[i])
 
 
 def image_callback():
@@ -74,10 +80,6 @@ def EfficientDetNode():
     pub = rospy.Publisher('/image_detections', Detection2DArray, queue_size=10)
     rate = rospy.Rate(1)  # 10hz
 
-    #path = '/home/epan/Rui/datasets/KITTI_Odometry_/image'
-    #stamp_path = '/home/epan/Rui/datasets/KITTI_Odometry_/times.txt'
-    path = '/media/epan/b405c51d-a20a-484c-b2a1-b6755e4534e7/Data/KITTI_Raw_Data/2011_09_26/2011_09_26_drive_0005_sync/image_02/data'
-    stamp_path = '/media/epan/b405c51d-a20a-484c-b2a1-b6755e4534e7/Data/KITTI_Raw_Data/2011_09_26/2011_09_26_drive_0005_sync/image_02/timestamps.txt'
     path_list = os.listdir(path)
     path_list.sort(key=lambda x: int(x.split('.')[0]))
 
@@ -169,10 +171,10 @@ def EfficientDetNode():
             rospy.loginfo(detection_results.header.stamp)
             pub.publish(detection_results)
 
-            if not os.path.exists('/media/epan/b405c51d-a20a-484c-b2a1-b6755e4534e7/Data/KITTI_Raw_Data/txt'):
-                os.makedirs('/media/epan/b405c51d-a20a-484c-b2a1-b6755e4534e7/Data/KITTI_Raw_Data/txt')
+            if not os.path.exists(txt_path):
+                os.makedirs(txt_path)
             #with open(f'txt/{cur_frame}.txt', 'w') as f:
-            with open(f'/media/epan/b405c51d-a20a-484c-b2a1-b6755e4534e7/Data/KITTI_Raw_Data/txt/{cur_frame}.txt', 'w') as f:
+            with open(f'{txt_path}/{cur_frame}.txt', 'w') as f:
                 #f.write(str((float)(stamp_lines[stamp_i][-13:].strip('\n'))) + "\n")
                 f.write(str(cur_stamp) + "\n")
                 for detection in detection_results.detections:
