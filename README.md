@@ -12,8 +12,11 @@ Please read the readme file of each sub-package first and install the correspond
 
 ## Run
 ### 1. Prepare dataset
-     # You can use the raw data download from KITTI.
-     # Or you can download a [sample data](https://github.com/epan-utbm/efficient_online_learning/releases/download/sample_data/2011_09_26_drive_0005_sync.tar)
+* (Optional) Download the [raw data](http://www.cvlibs.net/datasets/kitti/raw_data.php)  from KITTI.
+
+* (Optional) Download the [sample data](https://github.com/epan-utbm/efficient_online_learning/releases/download/sample_data/2011_09_26_drive_0005_sync.tar) for testing.
+
+* (Optional) Prepare a customized dataset according to the format of the sample data.
 
 ### 2. Manual set specific path parameters
      # launch/efficient_online_learning
