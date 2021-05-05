@@ -10,11 +10,6 @@ This pacakge is forked from [https://github.com/amirsaffari/online-random-forest
 sudo apt install libgmm++-dev libconfig++-dev libatlas-base-dev libblas-dev liblapack-dev
 ```
 
-# TODO
-
-* Replace libconfig++-dev (-lconfig++) by yaml-cpp
-* Compare with https://www.csie.ntu.edu.tw/~cjlin/liblinear/
-
 ---
 
 Online Random Forests
