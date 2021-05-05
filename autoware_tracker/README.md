@@ -45,7 +45,3 @@ Play the sample ros bag:
 ```
 rosbag play sample_moriyama_150324.bag
 ```
-
-<p align='center'>
-    <img src="/launch/demo.gif" alt="drawing" width="800"/>
-</p>
