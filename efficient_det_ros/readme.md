@@ -1,6 +1,8 @@
 This pacakge is forked from [https://github.com/zylo117/Yet-Another-EfficientDet-Pytorch](https://github.com/zylo117/Yet-Another-EfficientDet-Pytorch), and the original Readme file is below the dividing line.
 
-[xxxx-xx-xx]: todo
+[2020-09-10]: Trained the KITTI dataset with pretrained weights according to the official tutorial.
+
+[2020-09-15]: Added efficient_det_node.py to publish image detection results with '/image_detections'.
 
 ---
 
@@ -68,7 +70,7 @@ The speed/FPS test includes the time of post-processing with no jit/data precisi
     pip install pycocotools numpy opencv-python tqdm tensorboard tensorboardX pyyaml webcolors
     pip install torch==1.4.0
     pip install torchvision==0.5.0
-     
+
     # run the simple inference script
     python efficientdet_test.py
 
@@ -90,7 +92,7 @@ Check out this [tutorial](tutorial/train_shape.ipynb) if you are new to this. Yo
             -annotations
                 -instances_{train_set_name}.json
                 -instances_{val_set_name}.json
-    
+
     # for example, coco2017
     datasets/
         -coco2017/
@@ -108,23 +110,23 @@ Check out this [tutorial](tutorial/train_shape.ipynb) if you are new to this. Yo
 
 ### 2. Manual set project's specific parameters
 
-    # create a yml file {your_project_name}.yml under 'projects'folder 
+    # create a yml file {your_project_name}.yml under 'projects'folder
     # modify it following 'coco.yml'
-     
+
     # for example
     project_name: coco
     train_set: train2017
     val_set: val2017
-    num_gpus: 4  # 0 means using cpu, 1-N means using gpus 
-    
+    num_gpus: 4  # 0 means using cpu, 1-N means using gpus
+
     # mean and std in RGB order, actually this part should remain unchanged as long as your dataset is similar to coco.
     mean: [0.485, 0.456, 0.406]
     std: [0.229, 0.224, 0.225]
-    
+
     # this is coco anchors, change it if necessary
     anchors_scales: '[2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)]'
     anchors_ratios: '[(1.0, 1.0), (1.4, 0.7), (0.7, 1.4)]'
-    
+
     # objects from all labels from your dataset with the order from your annotations.
     # its index must match your dataset's category_id.
     # category_id is one_indexed,
@@ -133,36 +135,36 @@ Check out this [tutorial](tutorial/train_shape.ipynb) if you are new to this. Yo
 
 ### 3.a. Train on coco from scratch(not necessary)
 
-    # train efficientdet-d0 on coco from scratch 
+    # train efficientdet-d0 on coco from scratch
     # with batchsize 12
-    # This takes time and requires change 
+    # This takes time and requires change
     # of hyperparameters every few hours.
-    # If you have months to kill, do it. 
+    # If you have months to kill, do it.
     # It's not like someone going to achieve
     # better score than the one in the paper.
     # The first few epoches will be rather unstable,
     # it's quite normal when you train from scratch.
-    
+
     python train.py -c 0 --batch_size 64 --optim sgd --lr 8e-2
 
 ### 3.b. Train a custom dataset from scratch
 
-    # train efficientdet-d1 on a custom dataset 
+    # train efficientdet-d1 on a custom dataset
     # with batchsize 8 and learning rate 1e-5
-    
+
     python train.py -c 1 -p your_project_name --batch_size 8 --lr 1e-5
 
 ### 3.c. Train a custom dataset with pretrained weights (Highly Recommended)
 
     # train efficientdet-d2 on a custom dataset with pretrained weights
     # with batchsize 8 and learning rate 1e-3 for 10 epoches
-    
+
     python train.py -c 2 -p your_project_name --batch_size 8 --lr 1e-3 --num_epochs 10 \
      --load_weights /path/to/your/weights/efficientdet-d2.pth
-    
+
     # with a coco-pretrained, you can even freeze the backbone and train heads only
     # to speed up training and help convergence.
-    
+
     python train.py -c 2 -p your_project_name --batch_size 8 --lr 1e-3 --num_epochs 10 \
      --load_weights /path/to/your/weights/efficientdet-d2.pth \
      --head_only True
@@ -175,16 +177,16 @@ Check out this [tutorial](tutorial/train_shape.ipynb) if you are new to this. Yo
 ### 5. Resume training
 
     # let says you started a training session like this.
-    
+
     python train.py -c 2 -p your_project_name --batch_size 8 --lr 1e-3 \
      --load_weights /path/to/your/weights/efficientdet-d2.pth \
      --head_only True
-     
+
     # then you stopped it with a Ctrl+c, it exited with a checkpoint
-    
+
     # now you want to resume training from the last checkpoint
     # simply set load_weights to 'last'
-    
+
     python train.py -c 2 -p your_project_name --batch_size 8 --lr 1e-3 \
      --load_weights last \
      --head_only True
@@ -192,7 +194,7 @@ Check out this [tutorial](tutorial/train_shape.ipynb) if you are new to this. Yo
 ### 6. Evaluate model performance
 
     # eval on your_project, efficientdet-d5
-    
+
     python coco_eval.py -p your_project_name -c 5 \
      -w /path/to/your/weights
 
@@ -200,7 +202,7 @@ Check out this [tutorial](tutorial/train_shape.ipynb) if you are new to this. Yo
 
     # when you get bad result, you need to debug the training result.
     python train.py -c 2 -p your_project_name --batch_size 8 --lr 1e-3 --debug True
-    
+
     # then checkout test/ folder, there you can visualize the predicted boxes during training
     # don't panic if you see countless of error boxes, it happens when the training is at early stage.
     # But if you still can't see a normal box after several epoches, not even one in all image,
@@ -272,7 +274,7 @@ The second one:
     For example, P4 will downchannel to P4_0, then it goes P4_1,
     anyone may takes it for granted that P4_0 goes to P4_2 directly, right?
 
-    That's why they are wrong, 
+    That's why they are wrong,
     P4 should downchannel again with a different weights to P4_0_another,
     then it goes to P4_2.
 
@@ -284,7 +286,7 @@ Despite of the above issues, they are great repositories that enlighten me, henc
 
 This repository is mainly based on [efficientdet](https://github.com/signatrix/efficientdet), with the changing that makes sure that it performs as closer as possible as the paper.
 
-Btw, debugging static-graph TensorFlow v1 is really painful. Don't try to export it with automation tools like tf-onnx or mmdnn, they will only cause more problems because of its custom/complex operations. 
+Btw, debugging static-graph TensorFlow v1 is really painful. Don't try to export it with automation tools like tf-onnx or mmdnn, they will only cause more problems because of its custom/complex operations.
 
 And even if you succeeded, like I did, you will have to deal with the crazy messed up machine-generated code under the same class that takes more time to refactor than translating it from scratch.
 
@@ -319,7 +321,7 @@ Appreciate the great work from the following repositories:
 
 ## Donation
 
-If you like this repository, or if you'd like to support the author for any reason, you can donate to the author. Feel free to send me your name or introducing pages, I will make sure your name(s) on the sponsors list. 
+If you like this repository, or if you'd like to support the author for any reason, you can donate to the author. Feel free to send me your name or introducing pages, I will make sure your name(s) on the sponsors list.
 
 <img src="https://raw.githubusercontent.com/zylo117/Yet-Another-Efficient-Pytorch/master/res/alipay.jpg" width="360">
 

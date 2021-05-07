@@ -4,6 +4,10 @@ This pacakge is forked from [https://github.com/amirsaffari/online-random-forest
 
 [2020-09-18]: ROSified the original Online Random Forests, and added support for data stream (not limited to files).
 
+[2020-09-27]: Added the storage function by the binary tree structure allows the model to be stored and loaded.
+
+---
+
 # Install prerequisites
 
 ```
