@@ -3,7 +3,7 @@
 *We are actively updating this repository (especially removing hard code and adding comments) to make it easy to use. If you have any questions, please open an issue. Thanks!*
 
 This is a ROS-based efficient online learning framework for object classification in 3D LiDAR scans, taking advantage of robust multi-target tracking to avoid the need for data annotation by a human expert.
-The system is only tested in Ubuntu 18.04 and ROS Melodic.
+The system is only tested in Ubuntu 18.04 and ROS Melodic (compilation fails on Ubuntu 20.04 and ROS Noetic).
 
 Please watch the videos below for more details.
 
