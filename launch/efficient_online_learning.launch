@@ -31,14 +31,14 @@
     <param name="intensity_distribution" type="bool" value="true"/>
   </node>
 
-  <!-- Online Random Forest -->
+  <!-- Online Random Forest
   <node pkg="online_forests_ros" type="online_forests_ros" name="online_forests_ros" output="screen" respawn="false">
     <param name="conf_file_name" type="string" value="$(find online_forests_ros)/config/orf.conf"/>
     <param name="mode" type="int" value="1"/>
     <param name="minimum_samples" type="int" value="1"/>
     <param name="save_forest" type="bool" value="false"/>
     <param name="model_file_name" type="string" value="/home/epan/Rui/Efficient_Online_Learning/train.model"/>
-  </node>
+  </node> -->
 
   <!--  Online SVM
   <node pkg="online_svm_ros" type="online_svm_ros" name="online_svm_ros" output="screen" respawn="false">
