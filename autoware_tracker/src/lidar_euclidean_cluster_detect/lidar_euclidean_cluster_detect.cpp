@@ -1039,11 +1039,17 @@ int main(int argc, char **argv)
         _pub_clusters_message = nh.advertise<autoware_tracker::CloudClusterArray>("autoware_tracker/cluster/cloud_clusters", 1);
         _pub_detected_objects = nh.advertise<autoware_tracker::DetectedObjectArray>("autoware_tracker/cluster/objects", 1);
 
-        std::string points_topic = "/points_raw";
+        // std::string points_topic = "/points_raw";
+        // if (nh.getParam("autoware_tracker/cluster/points_node", points_topic)) {
+        //         ROS_INFO("[%s] Setting points_node to %s", __APP_NAME__, points_topic.c_str());
+        // } else {
+        //         ROS_INFO("[%s] No points_node received, defaulting to /points_raw", __APP_NAME__);
+        // }
+        std::string points_topic = "/points_no_ground";
         if (nh.getParam("autoware_tracker/cluster/points_node", points_topic)) {
                 ROS_INFO("[%s] Setting points_node to %s", __APP_NAME__, points_topic.c_str());
         } else {
-                ROS_INFO("[%s] No points_node received, defaulting to /points_raw", __APP_NAME__);
+                ROS_INFO("[%s] No points_node received, defaulting to /points_no_ground", __APP_NAME__);
         }
         // yang21itsc
         std::string image_detections_topic = "/image_detections";

@@ -5,10 +5,10 @@ autoware_tracker:
         extrinsic_calibration: "/home/epan/Rui/datasets/2011_09_26_drive_0005_sync/calib_2011_09_26.txt"
         iou_threshold: 0.5
 
-        points_node: "/points_raw"
+        points_node: "/points_no_ground"
         output_frame: "velodyne"
 
-        remove_ground: true
+        remove_ground: false
 
         downsample_cloud: true
         leaf_size: 0.1
