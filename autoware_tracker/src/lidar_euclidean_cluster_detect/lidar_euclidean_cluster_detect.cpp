@@ -1144,7 +1144,7 @@ int main(int argc, char **argv)
 
         typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::PointCloud2, vision_msgs::Detection2DArray> MySyncPolicy;
         // ApproximateTime takes a queue size as its constructor argument, hence MySyncPolicy(10)
-        message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(10), points_sub, image_detections_sub);
+        message_filters::Synchronizer<MySyncPolicy> sync(MySyncPolicy(100), points_sub, image_detections_sub);
         sync.registerCallback(boost::bind(&velodyne_callback, _1, _2));
         // yang21itsc
 
