@@ -25,10 +25,10 @@ Please read the readme file of each sub-package first and install the correspond
      # autoware_tracker/config/params.yaml
 
 ### 3. Run the project
-```bash
-$ cd catkin_ws
-$ source devel/setup.bash
-$ roslaunch src/efficient_online_learning/launch/efficient_online_learning.launch
+```sh
+cd catkin_ws
+source devel/setup.bash
+roslaunch src/efficient_online_learning/launch/efficient_online_learning.launch
 ```
 
 ## Citation
@@ -36,14 +36,11 @@ $ roslaunch src/efficient_online_learning/launch/efficient_online_learning.launc
 If you are considering using this code, please reference the following:
 
 ```
-@article{efficient_online_learning,
+@inproceedings{efficient_online_learning,
    author = {Rui Yang and Zhi Yan and Tao Yang and Yassine Ruichek},
    title = {Efficient Online Transfer Learning for 3D Object Classification in Autonomous Driving},
-   journal = {CoRR},
-   volume = {abs/2104.10037},
-   year = {2021},
-   url = {http://arxiv.org/abs/2104.10037},
-   archivePrefix = {arXiv},
-   eprint = {2104.10037}
+   booktitle = {Proceedings of the 2021 IEEE International Intelligent Transportation Systems Conference (ITSC)},
+   pages = {2950--2957},
+   year = {2021}
 }
 ```
