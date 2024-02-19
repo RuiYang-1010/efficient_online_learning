@@ -65,11 +65,23 @@ roslaunch src/efficient_online_learning/launch/efficient_online_learning.launch
 If you are considering using this code, please reference the following:
 
 ```
-@inproceedings{efficient_online_learning,
-   author = {Rui Yang and Zhi Yan and Tao Yang and Yassine Ruichek},
-   title = {Efficient Online Transfer Learning for 3D Object Classification in Autonomous Driving},
-   booktitle = {Proceedings of the 2021 IEEE International Intelligent Transportation Systems Conference (ITSC)},
-   pages = {2950--2957},
-   year = {2021}
+@article{yangr23sensors,
+author = {Rui Yang and Zhi Yan and Tao Yang and Yaonan Wang and Yassine Ruichek},
+title = {Efficient Online Transfer Learning for Road Participants Detection in Autonomous Driving},
+journal = {IEEE Sensors Journal},
+volume = {23},
+number = {19},
+Pages = {23522--23535},
+year = {2023}
+}
+
+@inproceedings{yangr21itsc,
+title={Efficient online transfer learning for 3D object classification in autonomous driving},
+author={Rui Yang and Zhi Yan and Tao Yang and Yassine Ruichek},
+booktitle = {Proceedings of the 2021 IEEE International Conference on Intelligent Transportation Systems (ITSC)},
+pages = {2950--2957},
+address = {Indianapolis, USA},
+month = {September},
+year = {2021}
 }
 ```
